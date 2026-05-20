@@ -98,6 +98,7 @@ with st.sidebar:
     st.markdown("### 🎓 신선여자고등학교")
     st.caption("고교학점제 이수 가이드북")
     st.markdown("---")
+    st.markdown("**만든 이: 신선여자고등학교 교육과정부 & 교무부**")
     year = st.radio(
         "입학년도 선택",
         [2025, 2026],
@@ -126,7 +127,7 @@ SEM_LABELS = {"1-1":"1학년 1학기","1-2":"1학년 2학기",
 # ----------------- 페이지: 홈 -----------------
 def page_home():
     st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
-    st.caption("신선여자고등학교 · DURU... 아, 신선여자고등학교")
+    st.caption("만든 이: 신선여자고등학교 교육과정부&교무부")
     st.markdown("")
     c1, c2, c3 = st.columns(3)
     with c1:
