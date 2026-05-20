@@ -96,7 +96,7 @@ if "selected_subjects" not in st.session_state:
 # ----------------- 사이드바 -----------------
 with st.sidebar:
     st.markdown("### 🎓 신선여자고등학교")
-    st.caption("고교학점제 이수 가이드북")
+    st.caption("주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.")
     st.markdown("---")
     year = st.radio(
         "입학년도 선택",
@@ -645,4 +645,4 @@ PAGES = {
 PAGES[page]()
 
 st.markdown("---")
-st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 ·")
+st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 since 2026.5.")
