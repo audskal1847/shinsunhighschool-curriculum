@@ -645,4 +645,4 @@ PAGES = {
 PAGES[page]()
 
 st.markdown("---")
-st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 · Made with Streamlit")
+st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 ·")
