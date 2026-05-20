@@ -98,7 +98,6 @@ with st.sidebar:
     st.markdown("### 🎓 신선여자고등학교")
     st.caption("고교학점제 이수 가이드북")
     st.markdown("---")
-    st.markdown("**만든 이: 신선여자고등학교 교육과정부 & 교무부**")
     year = st.radio(
         "입학년도 선택",
         [2025, 2026],
@@ -115,7 +114,20 @@ with st.sidebar:
          "🧮 시간표 시뮬레이터", "🎓 2028 대입 권장 과목", "🖨️ 결과 출력"],
         key="page_radio",
     )
-
+st.markdown("---")
+st.markdown(
+        """
+        <div style='text-align: center; padding: 10px 0;'>
+            <p style='font-weight: 700; font-size: 14px; color: #1f2937; margin: 0;'>
+                만든 이
+            </p>
+            <p style='font-weight: 700; font-size: 13px; color: #374151; margin: 4px 0 0 0;'>
+                신선여자고등학교<br>교육과정부 &amp; 교무부
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 curriculum = load_curriculum(year)
 career = load_career()
 comments = load_teacher_comments()
