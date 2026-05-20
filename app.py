@@ -1,12 +1,10 @@
+
 import streamlit as st
-import json
+import json, os
 from pathlib import Path
 
-# ─────────────────────────────────────────────
-# 페이지 기본 설정
-# ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="신선여고 고교학점제 이수 가이드북",
+    page_title="신선여자고등학교 고교학점제 이수 가이드북",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -14,373 +12,624 @@ st.set_page_config(
 
 DATA_DIR = Path(__file__).parent / "data"
 
-
-# ─────────────────────────────────────────────
-# 데이터 로더
-# ─────────────────────────────────────────────
+# ----------------- 공용 로더 -----------------
 @st.cache_data
 def load_curriculum(year: int):
     path = DATA_DIR / f"curriculum_{year}.json"
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 @st.cache_data
 def load_career():
-    path = DATA_DIR / "career_recommendations.json"
-    if not path.exists():
-        return {}
-    with open(path, "r", encoding="utf-8") as f:
+    with open(DATA_DIR / "career_recommendations.json", "r", encoding="utf-8") as f:
         return json.load(f)
-
 
 @st.cache_data
 def load_teacher_comments():
-    path = DATA_DIR / "teacher_comments.json"
-    if not path.exists():
-        return {}
-    with open(path, "r", encoding="utf-8") as f:
+    with open(DATA_DIR / "teacher_comments.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
+# ----------------- CSS -----------------
+st.markdown("""
+<style>
+.big-card {
+    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    border: 1px solid #e0e7ff;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.2s;
+    height: 100%;
+}
+.big-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(99,102,241,.15); }
+.big-card h2 {
+    background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 56px; margin: 0; font-weight: 800;
+}
+.big-card p { color: #4b5563; margin: 8px 0 0 0; }
+.big-card .sub { color: #6b7280; font-size: 13px; margin-top: 4px; }
 
-# ─────────────────────────────────────────────
-# 공통 사이드바 푸터 (제작자 정보)
-# ─────────────────────────────────────────────
-def render_sidebar_footer():
-    """사이드바 하단에 제작자 정보 카드 표시"""
-    st.sidebar.markdown("---")
-    st.sidebar.markdown(
-        """
-        <div style='
-            background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%);
-            border-left: 4px solid #2563eb;
-            border-radius: 8px;
-            padding: 12px 14px;
-            margin-top: 10px;
-        '>
-            <p style='font-size: 11px; color: #6b7280; margin: 0 0 4px 0; letter-spacing: 0.5px;'>
-                MADE BY
-            </p>
-            <p style='font-weight: 800; font-size: 14px; color: #1e3a8a; margin: 0; line-height: 1.4;'>
-                신선여자고등학교<br>
-                교육과정부 &amp; 교무부
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+.subject-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    transition: all 0.15s;
+}
+.subject-card:hover { border-color: #6366f1; box-shadow: 0 4px 12px rgba(99,102,241,.08); }
+.badge {
+    display:inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; margin-right: 4px;
+}
+.badge-area { background: #f3f4f6; color: #374151; }
+.badge-type-공통 { background: #dbeafe; color: #1e40af; }
+.badge-type-일반 { background: #ede9fe; color: #5b21b6; }
+.badge-type-진로 { background: #fef3c7; color: #92400e; }
+.badge-type-융합 { background: #fce7f3; color: #9d174d; }
+.badge-req { background: #dcfce7; color: #166534; }
+.badge-sel { background: #fef9c3; color: #854d0e; }
+.title-gradient {
+    background: linear-gradient(90deg, #4f46e5 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+.metric-box {
+    background: #f9fafb; border-left: 4px solid #6366f1;
+    padding: 12px 16px; border-radius: 8px; margin: 4px 0;
+}
+.alert-success { background:#f0fdf4; border-left:4px solid #22c55e; padding:12px; border-radius:8px; }
+.alert-warning { background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; border-radius:8px; }
+.alert-error { background:#fef2f2; border-left:4px solid #ef4444; padding:12px; border-radius:8px; }
+</style>
+""", unsafe_allow_html=True)
 
+# ----------------- 세션 -----------------
+if "entry_year" not in st.session_state:
+    st.session_state.entry_year = None
+if "selected_subjects" not in st.session_state:
+    st.session_state.selected_subjects = {}   # year -> set of subject ids
 
-# ─────────────────────────────────────────────
-# 사이드바 (입학년도 + 페이지 선택)
-# ─────────────────────────────────────────────
+# ----------------- 사이드바 -----------------
 with st.sidebar:
-    st.markdown("## 🎓 신선여고")
-    st.markdown("### 고교학점제 가이드북")
+    st.markdown("### 🎓 신선여자고등학교")
+    st.caption("고교학점제 이수 가이드북")
     st.markdown("---")
-
     year = st.radio(
-        "📅 입학년도 선택",
+        "입학년도 선택",
         [2025, 2026],
-        format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y == 2025 else '현재 1학년'})",
+        format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y==2025 else '현재 1학년'})",
+        index=0 if st.session_state.entry_year != 2026 else 1,
+        key="year_radio",
     )
+    st.session_state.entry_year = year
 
     st.markdown("---")
-
     page = st.radio(
-        "📂 메뉴",
-        [
-            "🏠 홈",
-            "🗺️ 핵심 이수 경로",
-            "📚 학년별 교과목 탐색",
-            "🧮 시간표 시뮬레이터",
-            "🎯 진로계열별 권장 과목",
-            "📄 결과 출력",
-        ],
+        "메뉴",
+        ["🏠 홈", "🗺️ 핵심 이수 경로", "📚 학년별 교과목 탐색",
+         "🧮 시간표 시뮬레이터", "🎓 2028 대입 권장 과목", "🖨️ 결과 출력"],
+        key="page_radio",
     )
 
-# 사이드바 하단 제작자 정보
-render_sidebar_footer()
-
-
-# ─────────────────────────────────────────────
-# 데이터 로드
-# ─────────────────────────────────────────────
 curriculum = load_curriculum(year)
 career = load_career()
 comments = load_teacher_comments()
 
+SEM_LABELS = {"1-1":"1학년 1학기","1-2":"1학년 2학기",
+              "2-1":"2학년 1학기","2-2":"2학년 2학기",
+              "3-1":"3학년 1학기","3-2":"3학년 2학기"}
 
-# ─────────────────────────────────────────────
-# 페이지 1: 홈
-# ─────────────────────────────────────────────
+# ----------------- 페이지: 홈 -----------------
 def page_home():
-    st.markdown(
-        f"""
-        <div style='text-align:center; padding: 30px 0 20px 0;'>
-            <h1 style='background: linear-gradient(90deg, #2563eb, #a855f7);
-                       -webkit-background-clip: text;
-                       -webkit-text-fill-color: transparent;
-                       font-size: 42px; font-weight: 900; margin: 0;'>
-                {year}학년도 입학생
-            </h1>
-            <h2 style='color: #1f2937; font-size: 28px; margin-top: 8px;'>
-                고교학점제 이수 가이드북
-            </h2>
-            <p style='color: #6b7280; margin-top: 16px;'>
-                좌측 메뉴에서 원하는 기능을 선택하세요
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("졸업 필수 학점", f"{curriculum.get('graduation_credits', 192)}학점")
-    with col2:
-        total_subjects = sum(
-            len(s.get("subjects", []))
-            for g in curriculum.get("grades", [])
-            for s in g.get("semesters", [])
-        )
-        st.metric("개설 과목 수", f"{total_subjects}개")
-    with col3:
-        st.metric("입학년도", f"{year}학년도")
+    st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
+    st.caption("신선여자고등학교 · DURU... 아, 신선여자고등학교")
+    st.markdown("")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown(f"""<div class='big-card'><h2>192</h2><p>졸업 필수 학점</p><span class='sub'>교과 174 + 창체 18</span></div>""", unsafe_allow_html=True)
+    with c2:
+        n_school = sum(1 for s in curriculum["subjects"] if s["section"]=="학교지정")
+        st.markdown(f"""<div class='big-card'><h2>{n_school}</h2><p>학교지정 과목</p><span class='sub'>필수 이수</span></div>""", unsafe_allow_html=True)
+    with c3:
+        n_select = sum(1 for s in curriculum["subjects"] if s["section"]=="학생선택")
+        st.markdown(f"""<div class='big-card'><h2>{n_select}</h2><p>학생선택 과목</p><span class='sub'>그룹별 택N</span></div>""", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 🧭 이용 안내")
-    st.info(
-        """
-        - **🗺️ 핵심 이수 경로**: 교과 영역별로 반드시 이수해야 하는 학점을 안내합니다.
-        - **📚 학년별 교과목 탐색**: 학년·학기별 개설 과목을 카드 형태로 확인합니다.
-        - **🧮 시간표 시뮬레이터**: 직접 과목을 선택하여 졸업 요건 충족 여부를 검증합니다.
-        - **🎯 진로계열별 권장 과목**: 의약학·이공·인문 등 진로별 추천 과목을 안내합니다.
-        - **📄 결과 출력**: 시뮬레이션 결과를 상담용으로 출력합니다.
-        """
-    )
+    st.markdown("### 📖 이 가이드북 사용법")
+    st.markdown("""
+1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 이수해야 하는 영역과 학점을 확인하세요.
+2. **📚 학년별 교과목 탐색** — 학년·학기별 과목 카드를 살펴보세요.
+3. **🧮 시간표 시뮬레이터** ⭐ — **직접 과목을 체크**해보고 졸업 요건 충족 여부를 확인할 수 있어요.
+4. **🎓 2028 대입 권장 과목** — 진로 계열별 추천 과목을 안내합니다.
+5. **🖨️ 결과 출력** — 시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요.
+""")
 
-
-# ─────────────────────────────────────────────
-# 페이지 2: 핵심 이수 경로
-# ─────────────────────────────────────────────
+# ----------------- 페이지: 핵심 이수 경로 -----------------
 def page_core_path():
     st.markdown("## 🗺️ 핵심 이수 경로")
-    st.caption("반드시 이수해야 하는 필수 영역의 로드맵입니다.")
+    st.caption("졸업까지 반드시 이수해야 하는 필수 영역과 학점입니다.")
 
-    requirements = curriculum.get("area_requirements", [])
-    if not requirements:
-        st.warning("영역별 필수 학점 데이터가 없습니다.")
-        return
-
+    areas = curriculum["area_requirements"]
+    # 기초/탐구/체육/예술/기·정·외·교양 그룹으로 묶어 표시
+    groups_display = [
+        ("📘 기초 교과 (국·수·영)", ["국어","수학","영어"], "각 영역 필수 학점을 학교지정 과목에서 자동 충족"),
+        ("🔬 탐구 교과 (사회·과학)", ["사회","과학"], "한국사·통합사회·통합과학 이수 시 자동 충족"),
+        ("👟 체육 교과", ["체육"], "1~2학년 학기당 2학점, 3학년 학기당 1학점"),
+        ("🎨 예술 교과", ["예술"], "음악·미술 학기 교차 이수 / 진로선택 과목"),
+        ("📐 기술·가정/정보/제2외국어/교양", ["기술.가정/정보","교양","제2외국어/한문"], "공통 필수 16학점 (세 교과군 합산)"),
+    ]
     cols = st.columns(3)
-    for i, req in enumerate(requirements):
+    for i, (title, area_list, desc) in enumerate(groups_display):
         with cols[i % 3]:
-            st.markdown(
-                f"""
-                <div style='border: 1px solid #e5e7eb; border-radius: 12px;
-                            padding: 20px; margin-bottom: 16px;
-                            background: #ffffff;'>
-                    <h4 style='margin: 0; color: #1f2937;'>{req.get('icon', '📘')} {req['area']}</h4>
-                    <p style='color: #6b7280; font-size: 13px; margin: 8px 0;'>
-                        필수 {req['required_credits']}학점
-                    </p>
-                    <p style='color: #374151; font-size: 14px; margin: 0;'>
-                        {req.get('description', '')}
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            req = None
+            total = 0
+            for a in area_list:
+                if a in areas:
+                    if areas[a].get("required"):
+                        req = areas[a]["required"]
+                    if areas[a].get("total"):
+                        total += areas[a]["total"]
+            # 통합 영역은 total이 중복 합산 안 되도록
+            if "공동 합계" in str([areas[a].get("note","") for a in area_list if a in areas]):
+                total = areas[area_list[0]].get("total") or 0
+            st.markdown(f"""
+            <div class='subject-card' style='min-height:140px'>
+              <div style='font-weight:700; font-size:16px; margin-bottom:6px'>{title}</div>
+              <div style='color:#4f46e5; font-weight:600'>필수 {req or '-'}학점 · 총 운영 {total}학점</div>
+              <div style='color:#6b7280; font-size:13px; margin-top:8px'>{desc}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
+    st.markdown("---")
+    st.markdown("### 📋 영역별 상세 학점")
+    rows = []
+    for a, info in areas.items():
+        rows.append({
+            "교과(군)": a,
+            "총 운영학점": info.get("total"),
+            "필수 이수학점": info.get("required"),
+            "비고": info.get("note","")
+        })
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+    st.info("💡 **학년별 학기당 이수학점**: 1학년 31학점 / 2학년 30학점 / 3학년 26학점 + 창의적 체험활동 학기당 3학점")
 
-# ─────────────────────────────────────────────
-# 페이지 3: 학년별 교과목 탐색
-# ─────────────────────────────────────────────
+# ----------------- 페이지: 학년별 교과목 탐색 -----------------
 def page_explore():
     st.markdown("## 📚 학년별 교과목 탐색")
-    st.caption("과목 카드를 클릭하여 담당 교사의 상세 코멘트와 선택 조건을 확인하세요.")
+    st.caption("학년을 선택하면 학기별 개설 과목을 카드로 볼 수 있습니다.")
 
-    grades = curriculum.get("grades", [])
-    if not grades:
-        st.warning("교육과정 데이터가 없습니다.")
-        return
-
-    tabs = st.tabs([f"{g['grade']}학년" for g in grades])
-
-    for tab, grade in zip(tabs, grades):
+    tab1, tab2, tab3 = st.tabs(["1학년", "2학년", "3학년"])
+    for tab, grade in [(tab1,1),(tab2,2),(tab3,3)]:
         with tab:
-            for sem in grade.get("semesters", []):
-                st.markdown(
-                    f"### 📅 {grade['grade']}학년 {sem['semester']}학기 "
-                    f"<span style='color:#6b7280; font-size: 14px;'>"
-                    f"(배정 과목 수: {len(sem.get('subjects', []))}개)</span>",
-                    unsafe_allow_html=True,
-                )
+            sem_cols = st.columns(2)
+            for idx, sem_num in enumerate([1,2]):
+                sem_key = f"{grade}-{sem_num}"
+                with sem_cols[idx]:
+                    st.markdown(f"#### 📅 {grade}학년 {sem_num}학기")
+                    show_semester_subjects(sem_key)
 
-                required = [s for s in sem.get("subjects", []) if s.get("type") == "필수"]
-                elective = [s for s in sem.get("subjects", []) if s.get("type") != "필수"]
+def show_semester_subjects(sem_key):
+    subs = []
+    for s in curriculum["subjects"]:
+        for sem in s.get("semesters", []):
+            if sem["sem"] == sem_key:
+                subs.append((s, sem["credit"]))
+                break
+        else:
+            for n in s.get("notes", []):
+                if n["sem"] == sem_key:
+                    subs.append((s, s.get("op_credit") or 0))
+                    break
 
-                if required:
-                    st.markdown(f"#### ✅ 필수 이수 과목 ({len(required)}과목)")
-                    show_subject_cards(required)
+    # split required vs selection
+    required = [(s,c) for (s,c) in subs if s["section"]=="학교지정"]
+    selective = [(s,c) for (s,c) in subs if s["section"]=="학생선택"]
 
-                if elective:
-                    st.markdown(f"#### 🎨 학생 선택 과목 ({len(elective)}과목)")
-                    show_subject_cards(elective)
+    if required:
+        with st.expander(f"✅ 필수 이수 과목 ({len(required)}과목)", expanded=True):
+            for s, c in required:
+                render_subject_card(s, c)
+    if selective:
+        # group by group_id
+        from collections import defaultdict
+        gmap = defaultdict(list)
+        for s, c in selective:
+            gmap[s["group_id"]].append((s,c))
+        for gid, items in gmap.items():
+            g = next((g for g in curriculum["groups"] if g["id"]==gid), None)
+            pick_label = ""
+            if g:
+                picks = [p for p in g["pick_per_sem"] if p["sem"]==sem_key]
+                if picks:
+                    pick_label = f" (택{picks[0]['pick']})"
+            with st.expander(f"🔵 학생선택 묶음 {gid}{pick_label} · {len(items)}과목 중 선택", expanded=False):
+                if g:
+                    st.caption(f"이 묶음의 총 이수학점: **{g.get('total_credit')}학점**")
+                for s, c in items:
+                    render_subject_card(s, c)
 
+def render_subject_card(s, sem_credit=None):
+    credit = sem_credit if sem_credit else s.get("op_credit") or 0
+    typ = s.get("type","")
+    badge_cls = f"badge-type-{typ}" if typ in ("공통","일반","진로","융합") else "badge-area"
+    req_badge = "<span class='badge badge-req'>필수</span>" if s["section"]=="학교지정" else "<span class='badge badge-sel'>선택</span>"
+    # teacher comment
+    yrk = str(curriculum["entry_year"])
+    tc = comments.get(yrk, {}).get(s["name"], None)
+    tc_html = ""
+    if tc and tc.get("comment"):
+        tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>"
+    st.markdown(f"""
+    <div class='subject-card'>
+      <div style='display:flex; justify-content:space-between; align-items:center'>
+        <div>
+          <span class='badge badge-area'>{s['area']}</span>
+          <span class='badge {badge_cls}'>{typ}</span>
+          {req_badge}
+        </div>
+        <div style='color:#4f46e5; font-weight:700'>{credit}학점</div>
+      </div>
+      <div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>
+      {tc_html}
+    </div>
+    """, unsafe_allow_html=True)
 
-def show_subject_cards(subjects):
-    cols = st.columns(3)
-    for i, subj in enumerate(subjects):
-        with cols[i % 3]:
-            comment = comments.get(subj["name"], "")
-            comment_badge = "💬 " if comment else ""
-            with st.expander(f"{comment_badge}{subj['name']} ({subj['credits']}학점)"):
-                st.markdown(f"- **교과**: {subj.get('category', '-')}")
-                st.markdown(f"- **이수구분**: {subj.get('classification', '-')}")
-                st.markdown(f"- **학점**: {subj['credits']}학점")
-                if subj.get("group_id"):
-                    st.markdown(f"- **선택 그룹**: {subj['group_id']}")
-                if comment:
-                    st.info(f"💬 **담당 교사 코멘트**\n\n{comment}")
-
-
-# ─────────────────────────────────────────────
-# 페이지 4: 시간표 시뮬레이터
-# ─────────────────────────────────────────────
+# ----------------- 페이지: 시뮬레이터 -----------------
 def page_simulator():
-    st.markdown("## 🧮 나만의 시간표 시뮬레이터")
-    st.caption("과목을 선택하면 졸업 요건 충족 여부를 실시간으로 확인할 수 있습니다.")
+    st.markdown("## 🧮 나의 시간표 시뮬레이터")
+    st.caption("학교지정 과목은 자동으로 포함됩니다. 학생선택 묶음에서 정확히 정해진 개수만큼 선택하세요.")
 
-    if "selected_subjects" not in st.session_state:
-        st.session_state.selected_subjects = {}
+    # init selection
+    yr_key = str(year)
+    if yr_key not in st.session_state.selected_subjects:
+        st.session_state.selected_subjects[yr_key] = set()
+    selected = st.session_state.selected_subjects[yr_key]
 
-    grades = curriculum.get("grades", [])
+    # auto-include 학교지정 (without group_id, or as required base)
+    auto = set()
+    for s in curriculum["subjects"]:
+        if s["section"]=="학교지정" and s["group_id"] is None:
+            auto.add(s["id"])
 
-    for grade in grades:
-        with st.expander(f"📖 {grade['grade']}학년", expanded=(grade["grade"] == 1)):
-            for sem in grade.get("semesters", []):
-                st.markdown(f"#### {grade['grade']}학년 {sem['semester']}학기")
+    # UI: 학생선택 묶음 + 학교지정 미니그룹(택1)
+    st.markdown("### 🔵 학생선택 묶음 (그룹별 택N)")
+    for g in curriculum["groups"]:
+        if g["id"].startswith("2025-G") or g["id"].startswith("2026-G"):
+            render_group_picker(g, selected)
+    st.markdown("### 🟣 학교지정 내 택N 묶음 (제2외국어 등)")
+    for g in curriculum["groups"]:
+        if g["id"].endswith("H01") or "H" in g["id"].split("-")[1]:
+            render_group_picker(g, selected)
 
-                # 필수 과목 자동 체크
-                required = [s for s in sem.get("subjects", []) if s.get("type") == "필수"]
-                if required:
-                    st.markdown("**✅ 필수 과목 (자동 선택)**")
-                    for s in required:
-                        st.session_state.selected_subjects[s["name"]] = True
-                        st.markdown(f"- {s['name']} ({s['credits']}학점)")
+    # 종합: selected ∪ auto
+    final = selected | auto
 
-                # 선택 그룹별
-                groups = {}
-                for s in sem.get("subjects", []):
-                    if s.get("type") != "필수":
-                        gid = s.get("group_id", "기타")
-                        groups.setdefault(gid, []).append(s)
-
-                for gid, subjects in groups.items():
-                    pick = subjects[0].get("pick_count", 1) if subjects else 1
-                    st.markdown(f"**🎨 {gid} (택{pick})**")
-
-                    selected_in_group = []
-                    for s in subjects:
-                        key = f"{grade['grade']}_{sem['semester']}_{s['name']}"
-                        checked = st.checkbox(
-                            f"{s['name']} ({s['credits']}학점)",
-                            key=key,
-                            value=st.session_state.selected_subjects.get(s["name"], False),
-                        )
-                        st.session_state.selected_subjects[s["name"]] = checked
-                        if checked:
-                            selected_in_group.append(s["name"])
-
-                    if len(selected_in_group) != pick:
-                        st.warning(
-                            f"⚠️ {pick}과목을 선택해야 합니다. (현재 {len(selected_in_group)}개 선택됨)"
-                        )
-                    else:
-                        st.success(f"✅ {pick}과목 선택 완료")
-
-    # 학점 요약
     st.markdown("---")
-    st.markdown("### 📊 학점 요약")
-    total = 0
-    for grade in grades:
-        for sem in grade.get("semesters", []):
-            for s in sem.get("subjects", []):
-                if st.session_state.selected_subjects.get(s["name"]):
-                    total += s["credits"]
+    st.markdown("### 📊 이수 학점 종합")
+    show_summary(final, auto, selected)
 
-    target = curriculum.get("graduation_credits", 192)
-    col1, col2, col3 = st.columns(3)
-    col1.metric("선택 학점", f"{total}학점")
-    col2.metric("졸업 요건", f"{target}학점")
-    col3.metric("달성률", f"{round(total/target*100, 1)}%")
+def render_group_picker(g, selected):
+    subs = [s for s in curriculum["subjects"] if s["id"] in g["subject_ids"]]
+    pick_total = sum(p["pick"] for p in g["pick_per_sem"])
+    sem_labels = ", ".join(SEM_LABELS.get(p["sem"],"") + f" 택{p['pick']}" for p in g["pick_per_sem"])
+    st.markdown(f"**[{g['id']}] {sem_labels}** · 총 {g.get('total_credit','-')}학점 (정확히 {pick_total}과목 선택)")
 
-    st.progress(min(total / target, 1.0))
+    # 학기별로 분리해서 체크박스
+    cols = st.columns(min(len(subs), 4) or 1)
+    chosen_count = 0
+    # When group has per-sem picks (e.g., 2-1 택1 + 2-2 택1), let user pick separately
+    if len(g["pick_per_sem"]) > 1:
+        # one selection per semester
+        for pi, pinfo in enumerate(g["pick_per_sem"]):
+            sem = pinfo["sem"]
+            options = ["(선택 안 함)"] + [s["name"] for s in subs]
+            current_idx = 0
+            # find currently selected for this sem
+            for i, s in enumerate(subs):
+                if s["id"] in selected:
+                    # check if same group with sem-specific choice tracking
+                    key_tracker = f"groupsel_{g['id']}_{sem}"
+                    if st.session_state.get(key_tracker) == s["name"]:
+                        current_idx = i + 1
+            key = f"groupsel_{g['id']}_{sem}"
+            choice = st.selectbox(f"  {SEM_LABELS.get(sem)} (택{pinfo['pick']})", options, key=key, index=current_idx)
+            # update selected set: remove old, add new for this sem
+            # collect ids from this group currently in selected for this sem
+            ids_in_g = {s["id"] for s in subs}
+            # Determine which subs are already in selected
+            currently = [s for s in subs if s["id"] in selected]
+            # We need a per-sem mapping; simple approach: clear all this group's selections first, then re-add based on selectboxes
+            # We'll handle that in unified pass below.
+    else:
+        pinfo = g["pick_per_sem"][0]
+        st.caption(f"※ 아래에서 정확히 **{pinfo['pick']}과목** 체크하세요.")
+        n_cols = 3
+        rows = (len(subs) + n_cols - 1) // n_cols
+        for ri in range(rows):
+            cc = st.columns(n_cols)
+            for ci in range(n_cols):
+                idx = ri * n_cols + ci
+                if idx >= len(subs): break
+                s = subs[idx]
+                key = f"chk_{g['id']}_{s['id']}"
+                with cc[ci]:
+                    val = st.checkbox(
+                        f"{s['name']} ({s.get('op_credit')}학점)",
+                        value=(s["id"] in selected),
+                        key=key,
+                    )
+                    if val:
+                        selected.add(s["id"])
+                    else:
+                        selected.discard(s["id"])
+        # validate count
+        in_sel = [s for s in subs if s["id"] in selected]
+        if len(in_sel) == pinfo["pick"]:
+            st.success(f"✅ {len(in_sel)}/{pinfo['pick']}과목 선택 완료")
+        elif len(in_sel) > pinfo["pick"]:
+            st.error(f"❌ {len(in_sel)}/{pinfo['pick']}과목 — 선택 초과 ({len(in_sel)-pinfo['pick']}개 줄여주세요)")
+        elif len(in_sel) > 0:
+            st.warning(f"⚠️ {len(in_sel)}/{pinfo['pick']}과목 — {pinfo['pick']-len(in_sel)}과목 더 선택해주세요")
+        else:
+            st.info(f"ℹ️ {pinfo['pick']}과목을 선택해주세요")
 
+    # For per-sem picker groups: post-process all selectboxes to update selected set
+    if len(g["pick_per_sem"]) > 1:
+        ids_in_g = {s["id"] for s in subs}
+        # clear all in this group, then add back per selectbox
+        selected -= ids_in_g
+        for pinfo in g["pick_per_sem"]:
+            sem = pinfo["sem"]
+            key = f"groupsel_{g['id']}_{sem}"
+            chosen_name = st.session_state.get(key)
+            if chosen_name and chosen_name != "(선택 안 함)":
+                for s in subs:
+                    if s["name"] == chosen_name:
+                        selected.add(s["id"])
+                        break
+        # validate
+        total_chosen = sum(1 for s in subs if s["id"] in selected)
+        if total_chosen == pick_total:
+            st.success(f"✅ {total_chosen}/{pick_total}과목 선택 완료")
+        elif total_chosen > 0:
+            st.warning(f"⚠️ {total_chosen}/{pick_total}과목 — 학기별 선택을 확인하세요")
 
-# ─────────────────────────────────────────────
-# 페이지 5: 진로계열별 권장 과목
-# ─────────────────────────────────────────────
+def show_summary(final_ids, auto_ids, picked_ids):
+    # compute totals
+    total_credit = 0
+    by_area = {}
+    by_sem = {f"{g}-{s}":0 for g in (1,2,3) for s in (1,2)}
+    by_type = {"공통":0,"일반":0,"진로":0,"융합":0}
+
+    for sid in final_ids:
+        s = next((x for x in curriculum["subjects"] if x["id"]==sid), None)
+        if not s: continue
+        c = s.get("op_credit") or 0
+        # 학기별 학점 (학기 정보로 분배)
+        if s.get("semesters"):
+            for sem in s["semesters"]:
+                total_credit += sem["credit"]
+                by_area[s["area"]] = by_area.get(s["area"],0) + sem["credit"]
+                by_sem[sem["sem"]] = by_sem.get(sem["sem"],0) + sem["credit"]
+                by_type[s.get("type","")] = by_type.get(s.get("type",""),0) + sem["credit"]
+        else:
+            total_credit += c
+            by_area[s["area"]] = by_area.get(s["area"],0) + c
+            if s["section"]=="학생선택":
+                # find group sem
+                g = next((g for g in curriculum["groups"] if sid in g["subject_ids"]),None)
+                if g:
+                    sem = g["pick_per_sem"][0]["sem"]
+                    by_sem[sem] = by_sem.get(sem,0) + c
+            by_type[s.get("type","")] = by_type.get(s.get("type",""),0) + c
+
+    # 창의적 체험활동 18 더하기
+    grand = total_credit + 18
+
+    c1,c2,c3,c4 = st.columns(4)
+    c1.metric("교과 이수학점", f"{total_credit}", delta=f"목표 174")
+    c2.metric("창의적 체험활동", "18", delta="6학기×3")
+    c3.metric("총 이수학점", f"{grand}", delta=f"졸업요건 192")
+    c4.metric("선택 과목 수", f"{len([s for s in curriculum['subjects'] if s['id'] in final_ids])}")
+
+    # 영역별 충족 여부
+    st.markdown("#### 📐 교과 영역별 충족 여부")
+    req_data = []
+    for a, info in curriculum["area_requirements"].items():
+        got = by_area.get(a, 0)
+        req = info.get("required") or 0
+        status = "✅" if got >= req else "❌"
+        req_data.append({
+            "교과(군)": a,
+            "이수학점": got,
+            "필수학점": req,
+            "달성률": f"{(got/req*100) if req else 0:.0f}%",
+            "상태": status,
+            "비고": info.get("note","")
+        })
+    st.dataframe(req_data, use_container_width=True, hide_index=True)
+
+    # 학기별
+    st.markdown("#### 📅 학기별 이수학점")
+    sem_data = []
+    for k,v in by_sem.items():
+        sem_data.append({"학기": SEM_LABELS.get(k,k), "교과 학점": v, "창체": 3, "합계": v+3})
+    st.dataframe(sem_data, use_container_width=True, hide_index=True)
+
+    # 유형별
+    st.markdown("#### 🎯 과목 유형별 학점 분포")
+    cc1, cc2, cc3, cc4 = st.columns(4)
+    cc1.metric("공통", f"{by_type.get('공통',0)}")
+    cc2.metric("일반선택", f"{by_type.get('일반',0)}")
+    cc3.metric("진로선택", f"{by_type.get('진로',0)}")
+    cc4.metric("융합선택", f"{by_type.get('융합',0)}")
+
+    # 종합 판정
+    st.markdown("---")
+    st.markdown("#### 🏁 종합 판정")
+    issues = []
+    # group pick count check
+    for g in curriculum["groups"]:
+        picked = sum(1 for sid in g["subject_ids"] if sid in picked_ids)
+        target = sum(p["pick"] for p in g["pick_per_sem"])
+        if picked != target:
+            issues.append(f"묶음 {g['id']}: {picked}/{target}과목 선택")
+    for a, info in curriculum["area_requirements"].items():
+        if by_area.get(a,0) < (info.get("required") or 0):
+            issues.append(f"{a}: 필수 {info['required']}학점 중 {by_area.get(a,0)}학점만 이수")
+
+    if not issues and total_credit >= 174:
+        st.markdown("<div class='alert-success'>🎉 <b>졸업 요건 충족!</b> 모든 묶음과 영역별 필수 학점을 만족합니다.</div>", unsafe_allow_html=True)
+    else:
+        msg = "<div class='alert-warning'><b>아래 항목을 확인해주세요:</b><ul>"
+        for i in issues:
+            msg += f"<li>{i}</li>"
+        if total_credit < 174:
+            msg += f"<li>교과 총 학점이 부족합니다 ({total_credit}/174)</li>"
+        msg += "</ul></div>"
+        st.markdown(msg, unsafe_allow_html=True)
+
+# ----------------- 페이지: 2028 대입 권장 -----------------
 def page_career():
-    st.markdown("## 🎯 진로계열별 권장 과목")
-    st.caption("2028 대입을 대비한 계열별 추천 과목입니다.")
-
-    if not career:
-        st.warning("진로 권장 과목 데이터가 없습니다.")
-        return
+    st.markdown("## 🎓 2028 대입 권장 과목 안내")
+    st.caption("진로계열별 권장 과목입니다. 학과/대학별로 다를 수 있으니 진학상담과 함께 활용하세요.")
 
     tracks = list(career.keys())
     selected = st.selectbox("진로 계열 선택", tracks)
-
     info = career[selected]
-    st.markdown(f"### {info.get('icon', '🎓')} {selected}")
-    st.write(info.get("description", ""))
 
-    st.markdown("#### 📌 권장 과목")
-    for subj in info.get("recommended", []):
-        st.markdown(f"- **{subj['name']}** — {subj.get('reason', '')}")
+    st.markdown(f"### {selected}")
+    st.markdown(f"**개요:** {info['summary']}")
+    st.markdown(f"**탐구과목 안내:** {info['탐구과목_안내']}")
 
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("#### ⭐ 필수 권장")
+        for n in info["필수권장"]:
+            offered = any(s["name"]==n or n in s["name"] for s in curriculum["subjects"])
+            mark = "🟢" if offered else "⚪"
+            st.markdown(f"- {mark} {n}")
+    with c2:
+        st.markdown("#### ✨ 우대 / 추가 권장")
+        for n in info["우대"]:
+            offered = any(s["name"]==n or n in s["name"] for s in curriculum["subjects"])
+            mark = "🟢" if offered else "⚪"
+            st.markdown(f"- {mark} {n}")
 
-# ─────────────────────────────────────────────
-# 페이지 6: 결과 출력
-# ─────────────────────────────────────────────
-def page_export():
-    st.markdown("## 📄 결과 출력")
-    st.caption("시뮬레이션 결과를 학부모 상담용으로 출력할 수 있습니다.")
+    st.caption("🟢 = 본교 개설 과목 / ⚪ = 본교 미개설 (자기주도학습/외부수업 등 보완)")
 
-    selected = [
-        name for name, v in st.session_state.get("selected_subjects", {}).items() if v
-    ]
-    if not selected:
-        st.info("먼저 시뮬레이터에서 과목을 선택해주세요.")
-        return
+# ----------------- 페이지: 결과 출력 -----------------
+def page_print():
+    st.markdown("## 🖨️ 결과 출력 (학부모 상담용)")
+    st.caption("시뮬레이터에서 선택한 결과를 HTML/CSV로 저장할 수 있습니다.")
 
-    st.markdown(f"### ✅ 선택한 과목 ({len(selected)}개)")
-    for s in selected:
-        st.markdown(f"- {s}")
+    yr_key = str(year)
+    picked = st.session_state.selected_subjects.get(yr_key, set())
+    auto = {s["id"] for s in curriculum["subjects"] if s["section"]=="학교지정" and s["group_id"] is None}
+    final = picked | auto
 
-    st.download_button(
-        "📥 텍스트 파일로 다운로드",
-        data="\n".join(selected),
-        file_name=f"신선여고_{year}_선택과목.txt",
-        mime="text/plain",
-    )
+    # build HTML report
+    name = st.text_input("학생 이름 (선택사항)", "")
+    sclass = st.text_input("학번/반 (선택사항)", "")
+    counselor = st.text_input("담임/상담교사 (선택사항)", "")
 
+    if st.button("📄 보고서 생성", type="primary"):
+        html = build_report_html(name, sclass, counselor, final)
+        st.download_button(
+            "📥 HTML 다운로드",
+            data=html,
+            file_name=f"신선여고_{year}입학_이수계획_{name or 'student'}.html",
+            mime="text/html",
+        )
+        # CSV
+        rows = ["영역,유형,과목명,학점,학기,구분"]
+        for sid in sorted(final):
+            s = next((x for x in curriculum["subjects"] if x["id"]==sid), None)
+            if not s: continue
+            sems = ";".join(f"{x['sem']}({x['credit']})" for x in s.get("semesters",[]))
+            if not sems:
+                g = next((g for g in curriculum["groups"] if sid in g["subject_ids"]),None)
+                sems = g["pick_per_sem"][0]["sem"] if g else ""
+            rows.append(f'"{s["area"]}","{s.get("type","")}","{s["name"]}",{s.get("op_credit","")},"{sems}","{s["section"]}"')
+        csv = "\n".join(rows)
+        st.download_button(
+            "📥 CSV 다운로드 (엑셀용)",
+            data=csv.encode("utf-8-sig"),
+            file_name=f"신선여고_{year}입학_이수계획_{name or 'student'}.csv",
+            mime="text/csv",
+        )
+        st.markdown("---")
+        st.markdown("### 미리보기")
+        st.components.v1.html(html, height=900, scrolling=True)
+        st.info("💡 다운로드한 HTML을 브라우저로 열어 **Ctrl+P (인쇄 → PDF로 저장)** 하면 PDF로도 보관할 수 있습니다.")
 
-# ─────────────────────────────────────────────
-# 라우팅
-# ─────────────────────────────────────────────
-if page == "🏠 홈":
-    page_home()
-elif page == "🗺️ 핵심 이수 경로":
-    page_core_path()
-elif page == "📚 학년별 교과목 탐색":
-    page_explore()
-elif page == "🧮 시간표 시뮬레이터":
-    page_simulator()
-elif page == "🎯 진로계열별 권장 과목":
-    page_career()
-elif page == "📄 결과 출력":
-    page_export()
+def build_report_html(name, sclass, counselor, final_ids):
+    subs = [s for s in curriculum["subjects"] if s["id"] in final_ids]
+    # group by semester
+    from collections import defaultdict
+    by_sem = defaultdict(list)
+    for s in subs:
+        if s.get("semesters"):
+            for sem in s["semesters"]:
+                by_sem[sem["sem"]].append((s, sem["credit"]))
+        else:
+            g = next((g for g in curriculum["groups"] if s["id"] in g["subject_ids"]),None)
+            sem = g["pick_per_sem"][0]["sem"] if g else "?"
+            by_sem[sem].append((s, s.get("op_credit") or 0))
+
+    rows_html = ""
+    grand_total = 0
+    for sem in ["1-1","1-2","2-1","2-2","3-1","3-2"]:
+        items = by_sem.get(sem, [])
+        sem_total = sum(c for _,c in items)
+        grand_total += sem_total
+        rows_html += f"<tr><td colspan='5' class='sem-hd'>{SEM_LABELS.get(sem)} · 교과 {sem_total}학점 + 창체 3학점 = {sem_total+3}학점</td></tr>"
+        for s, c in items:
+            rows_html += f"<tr><td>{s['area']}</td><td>{s.get('type','')}</td><td>{s['name']}</td><td>{c}</td><td>{'필수' if s['section']=='학교지정' else '선택'}</td></tr>"
+
+    html = f"""<!DOCTYPE html><html><head><meta charset='utf-8'>
+<title>신선여고 이수계획 - {name}</title>
+<style>
+body {{ font-family: 'Pretendard', 'Malgun Gothic', sans-serif; padding: 30px; color: #111; }}
+h1 {{ background: linear-gradient(90deg,#4f46e5,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color: transparent; }}
+.info {{ background:#f9fafb; padding:14px; border-radius:8px; margin-bottom:20px; }}
+.info p {{ margin: 4px 0; }}
+table {{ width:100%; border-collapse: collapse; margin-top: 14px; }}
+th, td {{ border:1px solid #d1d5db; padding:8px; font-size: 13px; }}
+th {{ background:#eef2ff; }}
+.sem-hd {{ background:#fef3c7; font-weight: 700; }}
+.total {{ font-size: 18px; font-weight: 700; margin-top: 16px; color:#4f46e5; }}
+@media print {{ body {{ padding: 10px; }} }}
+</style></head><body>
+<h1>🎓 신선여자고등학교 고교학점제 이수계획서</h1>
+<div class='info'>
+<p><b>입학년도:</b> {year}학년도</p>
+<p><b>학생:</b> {name or '_______'} &nbsp;&nbsp; <b>학번/반:</b> {sclass or '_______'}</p>
+<p><b>상담교사:</b> {counselor or '_______'}</p>
+</div>
+<h2>이수 과목 (학기별)</h2>
+<table>
+<thead><tr><th>교과(군)</th><th>유형</th><th>과목명</th><th>학점</th><th>구분</th></tr></thead>
+<tbody>{rows_html}</tbody>
+</table>
+<div class='total'>총 교과 이수학점: {grand_total} + 창의적 체험활동 18 = <b>{grand_total + 18}학점</b> / 졸업요건 192학점</div>
+</body></html>"""
+    return html
+
+# ----------------- 라우팅 -----------------
+PAGES = {
+    "🏠 홈": page_home,
+    "🗺️ 핵심 이수 경로": page_core_path,
+    "📚 학년별 교과목 탐색": page_explore,
+    "🧮 시간표 시뮬레이터": page_simulator,
+    "🎓 2028 대입 권장 과목": page_career,
+    "🖨️ 결과 출력": page_print,
+}
+PAGES[page]()
+
+st.markdown("---")
+st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 · Made with Streamlit")
