@@ -171,21 +171,6 @@ with st.sidebar:
         page = None
         year = st.session_state.get("entry_year", 2025)
 
-    # ── 만든 이 ──
-    st.markdown("---")
-    st.markdown(
-        """
-        <div style='text-align: center; padding: 14px 0;'>
-            <p style='font-weight: 700; font-size: 17px; color: #1f2937; margin: 0;'>
-                만든 이
-            </p>
-            <p style='font-weight: 700; font-size: 16px; color: #374151; margin: 6px 0 0 0; line-height: 1.5;'>
-                신선여자고등학교<br>교육과정부 &amp; 교무부
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 # ⭐ 데이터 로드 (한 번만!)
 curriculum = load_curriculum(year)
