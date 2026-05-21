@@ -190,7 +190,7 @@ def render_made_by():
             <p style='font-size: 20px; margin: 0; line-height: 1.6;'>
                 <span style='color: #111827; font-weight: 800;'>만든 이:</span>
                 <span style='color: #4b5563; font-weight: 600; margin-left: 6px;'>
-                    2026학년도 신선여자고등학교 교육과정부 &amp; 교무부
+                    신선여자고등학교 교육과정부 &amp; 교무부
                 </span>
             </p>
         </div>
