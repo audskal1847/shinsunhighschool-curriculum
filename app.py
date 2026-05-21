@@ -216,23 +216,23 @@ def render_made_by():
 def page_landing():
     st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
 
-    # 로고 + 학교명 영역 (좌우 분할)
-    col_logo, col_title = st.columns([1, 1.6])
+        # 로고 + 학교명 영역 (좌우 분할)
+    col_logo, col_title = st.columns([1, 2.2], gap="small")
 
     with col_logo:
         logo_path = ASSETS_DIR / "logo.png"
         if logo_path.exists():
-            st.image(str(logo_path), width=280)
+            st.image(str(logo_path), width=320)
         else:
             st.markdown(
-                "<div style='text-align:center; font-size:200px; line-height:1;'>🎓</div>",
+                "<div style='text-align:center; font-size:160px; line-height:1;'>🎓</div>",
                 unsafe_allow_html=True,
             )
 
     with col_title:
         st.markdown(
             """
-            <div style='padding: 50px 0 0 0;'>
+            <div style='padding: 60px 0 0 0; margin-left: -40px;'>
                 <h1 class='landing-title-pink'>신선여자고등학교</h1>
                 <h2 class='landing-title-black'>고교학점제 이수 가이드</h2>
             </div>
