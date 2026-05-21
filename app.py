@@ -312,33 +312,18 @@ def page_home():
             unsafe_allow_html=True,
         )
 
-        st.markdown("---")
+           st.markdown("---")
     st.markdown("### 📖 이 가이드북 사용법")
-    st.caption("👇 아래 항목을 클릭하면 해당 페이지로 바로 이동합니다.")
-    st.markdown("")
-
-    # 클릭 가능한 메뉴 항목들
-    nav_items = [
-        ("🗺️ 핵심 이수 경로",      "졸업까지 반드시 이수해야 하는 영역과 학점을 확인하세요."),
-        ("📚 학년별 교과목 탐색",   "학년·학기별 과목 카드를 살펴보세요."),
-        ("📅 시간표 시뮬레이터",    "⭐ 직접 과목을 체크해보고 졸업 요건 충족 여부를 확인할 수 있어요."),
-        ("🎓 2028 대입 권장 과목", "진로 계열별 추천 과목을 안내합니다."),
-        ("📄 결과 출력",           "시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요."),
-    ]
-
-    for label, desc in nav_items:
-        col_btn, col_desc = st.columns([1.3, 3])
-        with col_btn:
-            if st.button(label, key=f"nav_{label}", use_container_width=True):
-                st.session_state.page_radio = label
-                st.rerun()
-        with col_desc:
-            st.markdown(
-                f"<div style='padding: 8px 0 0 8px; color: #4b5563; font-size: 14px;'>— {desc}</div>",
-                unsafe_allow_html=True,
-            )
+    st.markdown("""
+1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 이수해야 하는 영역과 학점을 확인하세요.
+2. **📚 학년별 교과목 탐색** — 학년·학기별 과목 카드를 살펴보세요.
+3. **📅 시간표 시뮬레이터 ⭐** — **직접 과목을 체크**해보고 졸업 요건 충족 여부를 확인할 수 있어요.
+4. **🎓 2028 대입 권장 과목** — 진로 계열별 추천 과목을 안내합니다.
+5. **📄 결과 출력** — 시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요.
+""")
 
     render_made_by()
+
 
 # ----------------- 페이지: 핵심 이수 경로 -----------------
 def page_core_path():
