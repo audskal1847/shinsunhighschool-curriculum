@@ -115,6 +115,18 @@ st.markdown("""
     margin: 12px 0 0 0;
     text-align: center;
 }
+    /* Primary 버튼 글씨 크게 + 굵게 */
+    .stButton > button[kind="primary"] {
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        padding: 18px 28px !important;
+        letter-spacing: -0.3px !important;
+    }
+    .stButton > button[kind="primary"] p {
+        font-size: 22px !important;
+        font-weight: 900 !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
