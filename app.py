@@ -226,20 +226,11 @@ def page_landing():
     )
     st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
 
-    # 학년도 선택 카드 (2개)
+        # 학년도 선택 카드 (2개)
     col_pad_l, col1, col_mid, col2, col_pad_r = st.columns([1, 3, 0.5, 3, 1])
 
     with col1:
-        st.markdown(
-            """
-            <div style='padding: 20px 0 16px 0;'>
-                <p class='landing-year'>2025학년도<br>입학생</p>
-                <p class='landing-year-sub'>(현재 2학년)</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("2025학년도 입학생 선택", 
+        if st.button("2025학년도 입학생 선택 (현재 2학년)", 
                      key="landing_btn_2025", 
                      use_container_width=True,
                      type="primary"):
@@ -248,23 +239,13 @@ def page_landing():
             st.rerun()
 
     with col2:
-        st.markdown(
-            """
-            <div style='padding: 20px 0 16px 0;'>
-                <p class='landing-year'>2026학년도<br>입학생</p>
-                <p class='landing-year-sub'>(현재 1학년)</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("2026학년도 입학생 선택", 
+        if st.button("2026학년도 입학생 선택 (현재 1학년)", 
                      key="landing_btn_2026", 
                      use_container_width=True,
                      type="primary"):
             st.session_state.entry_year = 2026
             st.session_state.year_selected = True
             st.rerun()
-
 
 # ---------------- 페이지: 홈 ----------------
 def page_home():
