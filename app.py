@@ -217,7 +217,7 @@ def page_landing():
     st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
 
             # 로고 + 학교명 영역 (중앙 정렬)
-    pad_l, col_logo, col_title, pad_r = st.columns([2, 1.5, 2.5, 1], gap="small")
+    pad_l, col_logo, col_title, pad_r = st.columns([1.5, 1.5, 2.5, 1.5], gap="small")
 
     with col_logo:
         logo_path = ASSETS_DIR / "logo.png"
