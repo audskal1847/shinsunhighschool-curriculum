@@ -145,7 +145,7 @@ if "selected_subjects" not in st.session_state:    # ⭐ 시뮬레이터용 추�
 with st.sidebar:
    # 기존 146번째 줄(학교 이름)은 삭제합니다.
     st.markdown(
-    "<p style='font-size: 16px; color: #555555;'>주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", 
+    "<p style='font-size: 20px; color: #555555;'>주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", 
     unsafe_allow_html=True
 )
     st.markdown("---")
