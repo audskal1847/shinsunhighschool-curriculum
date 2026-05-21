@@ -167,7 +167,7 @@ with st.sidebar:
             key="page_radio",
         )
     else:
-        st.info("👉 메인 화면에서 입학년도를         먼저 선택해야 다음 기능을 사용할 수 있습니다.")
+        st.info("👉 가장 먼저 입학년도를 선택해야 다음 기능을 사용할 수 있습니다.")
         page = None
         year = st.session_state.get("entry_year", 2025)
 
