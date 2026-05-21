@@ -216,13 +216,13 @@ def render_made_by():
 def page_landing():
     st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
 
-            # 로고 + 학교명 영역 (중앙 정렬)
-    pad_l, col_logo, col_title, pad_r = st.columns([2, 1.5, 2.5, 1.5], gap="small")
+        # 로고 + 학교명 영역 (좌우 분할)
+    col_logo, col_title = st.columns([1, 2.8], gap="small")
 
     with col_logo:
         logo_path = ASSETS_DIR / "logo.png"
         if logo_path.exists():
-            st.image(str(logo_path), width=260)
+            st.image(str(logo_path), width=320)
         else:
             st.markdown(
                 "<div style='text-align:center; font-size:160px; line-height:1;'>🎓</div>",
@@ -232,7 +232,7 @@ def page_landing():
     with col_title:
         st.markdown(
             """
-            <div style='padding: 50px 0 0 0;'>
+            <div style='padding: 60px 0 0 0; margin-left: -60px;'>
                 <h1 class='landing-title-pink'>신선여자고등학교</h1>
                 <h2 class='landing-title-black'>고교학점제 이수 가이드</h2>
             </div>
@@ -312,7 +312,7 @@ def page_home():
             unsafe_allow_html=True,
         )
 
-           st.markdown("---")
+    st.markdown("---")
     st.markdown("### 📖 이 가이드북 사용법")
     st.markdown("""
 1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 이수해야 하는 영역과 학점을 확인하세요.
@@ -323,8 +323,6 @@ def page_home():
 """)
 
     render_made_by()
-
-
 # ----------------- 페이지: 핵심 이수 경로 -----------------
 def page_core_path():
     st.markdown("## 🗺️ 핵심 이수 경로")
