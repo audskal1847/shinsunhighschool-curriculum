@@ -232,7 +232,7 @@ def page_landing():
     with col_title:
         st.markdown(
             """
-            <div style='padding: 60px 0 0 0; margin-left: -40px;'>
+            <div style='padding: 60px 0 0 0; margin-left: -60px;'>
                 <h1 class='landing-title-pink'>신선여자고등학교</h1>
                 <h2 class='landing-title-black'>고교학점제 이수 가이드</h2>
             </div>
