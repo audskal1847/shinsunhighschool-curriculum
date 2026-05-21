@@ -89,45 +89,58 @@ st.markdown("""
 
 # ----------------- 세션 -----------------
 if "entry_year" not in st.session_state:
-    st.session_state.entry_year = None
-if "selected_subjects" not in st.session_state:
-    st.session_state.selected_subjects = {}   # year -> set of subject ids
+    st.session_state.entry_year = 2025
+if "year_selected" not in st.session_state:    
+    st.session_state.year_selected = False
+
 
 # ----------------- 사이드바 -----------------
+# ──────────────── 사이드바 ────────────────
 with st.sidebar:
     st.markdown("### 🎓 신선여자고등학교")
     st.caption("주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.")
     st.markdown("---")
-    year = st.radio(
-        "입학년도 선택",
-        [2025, 2026],
-        format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y==2025 else '현재 1학년'})",
-        index=0 if st.session_state.entry_year != 2026 else 1,
-        key="year_radio",
-    )
-    st.session_state.entry_year = year
 
+    # ⭐ 학년도가 선택된 경우에만 메뉴 표시
+    if st.session_state.get("year_selected", False):
+        year = st.radio(
+            "입학년도 선택",
+            [2025, 2026],
+            format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y==2025 else '현재 1학년'})",
+            index=0 if st.session_state.entry_year != 2026 else 1,
+            key="year_radio",
+        )
+        st.session_state.entry_year = year
+
+        st.markdown("---")
+
+        page = st.radio(
+            "메뉴",
+            ["🏠 홈", "🗺️ 핵심 이수 경로", "📚 학년별 교과목 탐색",
+             "📅 시간표 시뮬레이터", "🎓 2028 대입 권장 과목", "📄 결과 출력"],
+            key="page_radio",
+        )
+    else:
+        st.info("👉 메인 화면에서 입학년도를 먼저 선택해주세요.")
+        page = None
+        year = st.session_state.get("entry_year", 2025)
+
+    # ── 만든 이 (글자 크기 키움) ──
     st.markdown("---")
-    page = st.radio(
-        "메뉴",
-        ["🏠 홈", "🗺️ 핵심 이수 경로", "📚 학년별 교과목 탐색",
-         "🧮 시간표 시뮬레이터", "🎓 2028 대입 권장 과목", "🖨️ 결과 출력"],
-        key="page_radio",
-    )
-st.markdown("---")
-st.markdown(
+    st.markdown(
         """
-        <div style='text-align: center; padding: 10px 0;'>
-            <p style='font-weight: 700; font-size: 14px; color: #1f2937; margin: 0;'>
+        <div style='text-align: center; padding: 14px 0;'>
+            <p style='font-weight: 700; font-size: 17px; color: #1f2937; margin: 0;'>
                 만든 이
             </p>
-            <p style='font-weight: 700; font-size: 13px; color: #374151; margin: 4px 0 0 0;'>
+            <p style='font-weight: 700; font-size: 16px; color: #374151; margin: 6px 0 0 0; line-height: 1.5;'>
                 신선여자고등학교<br>교육과정부 &amp; 교무부
             </p>
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
+
 curriculum = load_curriculum(year)
 career = load_career()
 comments = load_teacher_comments()
@@ -136,29 +149,59 @@ SEM_LABELS = {"1-1":"1학년 1학기","1-2":"1학년 2학기",
               "2-1":"2학년 1학기","2-2":"2학년 2학기",
               "3-1":"3학년 1학기","3-2":"3학년 2학기"}
 
-# ----------------- 페이지: 홈 -----------------
+curriculum = load_curriculum(year)
+career = load_career()
+comments = load_teacher_comments()
+
+SEM_LABELS = {"1-1":"1학년 1학기","1-2":"1학년 2학기",
+              "2-1":"2학년 1학기","2-2":"2학년 2학기",
+              "3-1":"3학년 1학기","3-2":"3학년 2학기"}
+
+# ---------------- 페이지: 홈 ----------------
 def page_home():
-    st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
+    # ⭐ 상단: 학년도 변경 버튼 (우측 정렬)
+    col_l, col_r = st.columns([5, 1])
+    with col_r:
+        if st.button("🔄 학년도 변경", use_container_width=True, key="btn_change_year"):
+            st.session_state.year_selected = False
+            st.rerun()
+
+    # 메인 타이틀
+    st.markdown(
+        f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>",
+        unsafe_allow_html=True,
+    )
     st.caption("성공적인 고교학점제 마무리를 위한 진로 학업 설계 가이드북")
     st.markdown("")
+
+    # 메트릭 카드 3개
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.markdown(f"""<div class='big-card'><h2>192</h2><p>졸업 필수 학점</p><span class='sub'>교과 174 + 창체 18</span></div>""", unsafe_allow_html=True)
+        st.markdown(
+            f"""<div class='big-card'><h2>192</h2><p>졸업 필수 학점</p><span class='sub'>교과 174 + 창체 18</span></div>""",
+            unsafe_allow_html=True,
+        )
     with c2:
-        n_school = sum(1 for s in curriculum["subjects"] if s["section"]=="학교지정")
-        st.markdown(f"""<div class='big-card'><h2>{n_school}</h2><p>학교지정 과목</p><span class='sub'>필수 이수</span></div>""", unsafe_allow_html=True)
+        n_school = sum(1 for s in curriculum["subjects"] if s["section"] == "학교지정")
+        st.markdown(
+            f"""<div class='big-card'><h2>{n_school}</h2><p>학교지정 과목</p><span class='sub'>필수 이수</span></div>""",
+            unsafe_allow_html=True,
+        )
     with c3:
-        n_select = sum(1 for s in curriculum["subjects"] if s["section"]=="학생선택")
-        st.markdown(f"""<div class='big-card'><h2>{n_select}</h2><p>학생선택 과목</p><span class='sub'>그룹별 택N</span></div>""", unsafe_allow_html=True)
+        n_select = sum(1 for s in curriculum["subjects"] if s["section"] == "학생선택")
+        st.markdown(
+            f"""<div class='big-card'><h2>{n_select}</h2><p>학생선택 과목</p><span class='sub'>그룹별 택N</span></div>""",
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
     st.markdown("### 📖 이 가이드북 사용법")
     st.markdown("""
 1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 이수해야 하는 영역과 학점을 확인하세요.
 2. **📚 학년별 교과목 탐색** — 학년·학기별 과목 카드를 살펴보세요.
-3. **🧮 시간표 시뮬레이터** ⭐ — **직접 과목을 체크**해보고 졸업 요건 충족 여부를 확인할 수 있어요.
+3. **📅 시간표 시뮬레이터 ⭐** — **직접 과목을 체크**해보고 졸업 요건 충족 여부를 확인할 수 있어요.
 4. **🎓 2028 대입 권장 과목** — 진로 계열별 추천 과목을 안내합니다.
-5. **🖨️ 결과 출력** — 시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요.
+5. **📄 결과 출력** — 시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요.
 """)
 
 # ----------------- 페이지: 핵심 이수 경로 -----------------
@@ -633,16 +676,21 @@ th {{ background:#eef2ff; }}
 </body></html>"""
     return html
 
-# ----------------- 라우팅 -----------------
-PAGES = {
-    "🏠 홈": page_home,
-    "🗺️ 핵심 이수 경로": page_core_path,
-    "📚 학년별 교과목 탐색": page_explore,
-    "🧮 시간표 시뮬레이터": page_simulator,
-    "🎓 2028 대입 권장 과목": page_career,
-    "🖨️ 결과 출력": page_print,
-}
-PAGES[page]()
+# ---------------- 라우팅 ----------------
+if not st.session_state.get("year_selected", False):
+    # ⭐ 학년도 미선택 → 랜딩 페이지 표시
+    page_landing()
+else:
+    # ⭐ 학년도 선택됨 → 일반 페이지 라우팅
+    PAGES = {
+        "🏠 홈": page_home,
+        "🗺️ 핵심 이수 경로": page_core_path,
+        "📚 학년별 교과목 탐색": page_explore,
+        "📅 시간표 시뮬레이터": page_simulator,
+        "🎓 2028 대입 권장 과목": page_career,
+        "📄 결과 출력": page_print,
+    }
+    PAGES[page]()
 
-st.markdown("---")
-st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 since 2026.5.")
+    st.markdown("---")
+    st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 since 2026.5.")
