@@ -219,18 +219,15 @@ def page_landing():
             # 로고 + 학교명 영역 (중앙 정렬)
     pad_l, col_logo, col_title, pad_r = st.columns([2, 1.5, 2.5, 1.5], gap="small")
 
-        with col_logo:
+    with col_logo:
         logo_path = ASSETS_DIR / "logo.png"
         if logo_path.exists():
-            sub_l, sub_r = st.columns([1, 4])
-            with sub_r:
-                st.image(str(logo_path), width=260)
+            st.image(str(logo_path), width=260)
         else:
             st.markdown(
-                "<div style='text-align:right; font-size:160px; line-height:1;'>🎓</div>",
+                "<div style='text-align:center; font-size:160px; line-height:1;'>🎓</div>",
                 unsafe_allow_html=True,
             )
-
 
     with col_title:
         st.markdown(
