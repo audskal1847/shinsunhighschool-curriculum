@@ -261,7 +261,7 @@ def page_landing():
             st.session_state.entry_year = 2026
             st.session_state.year_selected = True
             st.rerun()
-render_made_by()
+    render_made_by()
 # ---------------- 페이지: 홈 ----------------
 def page_home():
     # ⭐ 상단: 학년도 변경 버튼 (우측 정렬)
@@ -309,7 +309,7 @@ def page_home():
 5. **📄 결과 출력** — 시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요.
 """)
 
-render_made_by()
+    render_made_by()
 # ----------------- 페이지: 핵심 이수 경로 -----------------
 def page_core_path():
     st.markdown("## 🗺️ 핵심 이수 경로")
