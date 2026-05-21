@@ -117,7 +117,7 @@ st.markdown("""
 }
     /* Primary 버튼 글씨 크게 + 굵게 */
     .stButton > button[kind="primary"] {
-        font-size: 22px !important;
+        font-size: 25px !important;
         font-weight: 900 !important;
         padding: 18px 28px !important;
         letter-spacing: -0.3px !important;
