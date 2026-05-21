@@ -143,8 +143,11 @@ if "selected_subjects" not in st.session_state:    # ⭐ 시뮬레이터용 추�
 
 # ----------------- 사이드바 -----------------
 with st.sidebar:
-    st.markdown("### 🎓 신선여자고등학교")
-    st.caption("주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.")
+   # 기존 146번째 줄(학교 이름)은 삭제합니다.
+    st.markdown(
+    "<p style='font-size: 16px; color: #555555;'>주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", 
+    unsafe_allow_html=True
+)
     st.markdown("---")
 
     # ⭐ 학년도가 선택된 경우에만 메뉴 표시
