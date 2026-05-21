@@ -119,7 +119,7 @@ st.markdown("""
     .stButton > button[kind="primary"] {
         font-size: 22px !important;
         font-weight: 900 !important;
-        padding: 16px 24px !important;
+        padding: 18px 28px !important;
         letter-spacing: -0.3px !important;
     }
     .stButton > button[kind="primary"] p {
