@@ -184,7 +184,22 @@ SEM_LABELS = {"1-1":"1학년 1학기","1-2":"1학년 2학기",
               "2-1":"2학년 1학기","2-2":"2학년 2학기",
               "3-1":"3학년 1학기","3-2":"3학년 2학기"}
 
-
+# ---------------- 공통 푸터: 만든 이 ----------------
+def render_made_by():
+    st.markdown(
+        """
+        <div style='text-align: center; padding: 24px 0 16px 0; 
+                    border-top: 1px solid #e5e7eb; margin-top: 40px;'>
+            <p style='font-size: 16px; margin: 0; line-height: 1.6;'>
+                <span style='color: #111827; font-weight: 800;'>만든 이:</span>
+                <span style='color: #4b5563; font-weight: 600; margin-left: 6px;'>
+                    2026학년도 신선여자고등학교 교육과정부 &amp; 교무부
+                </span>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 # ---------------- 페이지: 랜딩 (입학년도 선택) ----------------
 def page_landing():
     st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
@@ -246,7 +261,7 @@ def page_landing():
             st.session_state.entry_year = 2026
             st.session_state.year_selected = True
             st.rerun()
-
+render_made_by()
 # ---------------- 페이지: 홈 ----------------
 def page_home():
     # ⭐ 상단: 학년도 변경 버튼 (우측 정렬)
@@ -294,7 +309,7 @@ def page_home():
 5. **📄 결과 출력** — 시뮬레이션 결과를 PDF/HTML로 저장해 상담 자료로 활용하세요.
 """)
 
-
+render_made_by()
 # ----------------- 페이지: 핵심 이수 경로 -----------------
 def page_core_path():
     st.markdown("## 🗺️ 핵심 이수 경로")
@@ -754,5 +769,3 @@ else:
     }
     PAGES[page]()
 
-    st.markdown("---")
-    st.caption("© 신선여자고등학교 고교학점제 이수 가이드북 since 2026.5.")
