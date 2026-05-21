@@ -187,7 +187,7 @@ def render_made_by():
         """
         <div style='text-align: center; padding: 24px 0 16px 0; 
                     border-top: 1px solid #e5e7eb; margin-top: 40px;'>
-            <p style='font-size: 16px; margin: 0; line-height: 1.6;'>
+            <p style='font-size: 20px; margin: 0; line-height: 1.6;'>
                 <span style='color: #111827; font-weight: 800;'>만든 이:</span>
                 <span style='color: #4b5563; font-weight: 600; margin-left: 6px;'>
                     2026학년도 신선여자고등학교 교육과정부 &amp; 교무부
