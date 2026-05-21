@@ -246,7 +246,7 @@ def page_landing():
     st.markdown(
         """
         <p style='text-align: center; color: #1f2937; 
-                  font-size: 20px; font-weight: 600; margin: 0;'>
+                  font-size: 30px; font-weight: 600; margin: 0;'>
             * 입학년도를 선택하세요.
         </p>
         """,
