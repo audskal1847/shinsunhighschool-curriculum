@@ -551,21 +551,15 @@ def show_summary(final_ids, auto_ids, picked_ids):
     by_sem = {f"{g}-{s}":0 for g in (1,2,3) for s in (1,2)}
     by_type = {"공통":0,"일반":0,"진로":0,"융합":0}
 
-    # ------------------ 수정 후 ------------------
-    for sid in final_ids:
-        s = next((x for x in curriculum["subjects"] if x["id"]==sid), None)
-        if not s: continue
-        
-        # 1학년 데이터만 합산하기 위해 필터링
-        semesters = s.get("semesters", [])
-        for sem in semesters:
-            # 1학년 1학기 혹은 2학기 데이터만 계산에 포함
-            if sem["sem"] in ["1-1", "1-2"]:
-                c = sem["credit"]
-                total_credit += c
-                by_area[s["area"]] = by_area.get(s["area"],0) + c
-                by_sem[sem["sem"]] = by_sem.get(sem["sem"],0) + c
-                by_type[s.get("type","")] = by_type.get(s.get("type",""),0) + c
+   if s.get("semesters"):
+            for sem in s["semesters"]:
+                # 💡 핵심: sem(학기)이 1-1 또는 1-2일 때만 학점을 계산하도록 조건 추가
+                if sem["sem"] in ["1-1", "1-2"]:
+                    c = sem["credit"]
+                    total_credit += c
+                    by_area[s["area"]] = by_area.get(s["area"],0) + c
+                    by_sem[sem["sem"]] = by_sem.get(sem["sem"],0) + c
+                    by_type[s.get("type","")] = by_type.get(s.get("type",""),0) + c
         else:
             total_credit += c
             by_area[s["area"]] = by_area.get(s["area"],0) + c
