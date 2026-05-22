@@ -322,7 +322,7 @@ def page_core_path():
         ("🎨 예술 교과", ["예술"], "음악·미술 학기 교차 이수 / 진로선택 과목"),
         ("📐 기술·가정/정보/제2외국어/교양", ["기술.가정/정보","교양","제2외국어/한문"], "공통 필수 16학점 (세 교과군 합산)"),
     ]
-   cols = st.columns(3)
+  cols = st.columns(3)  
     for i, (title, area_list, desc) in enumerate(groups_display):
         with cols[i % 3]:
             req = 0
