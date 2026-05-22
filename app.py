@@ -13,7 +13,7 @@ DATA_DIR = Path(__file__).parent / "data"
 ASSETS_DIR = Path(__file__).parent / "assets"   # ⭐ 로고 폴더
 
 # ----------------- 공용 로더 -----------------
-@st.cache_data
+#st.cache_data
 def load_curriculum(year: int):
     path = DATA_DIR / f"curriculum_{year}.json"
     with open(path, "r", encoding="utf-8") as f:
