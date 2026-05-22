@@ -621,8 +621,7 @@
       "op_credit": 2,
       "semesters": [
         {
-          
-        "sem": "1-2",
+          "sem": "1-2",
           "credit": 2
         }
       ],
@@ -846,7 +845,7 @@
       "notes": [],
       "group_id": "2025-G01"
     },
-   {
+    {
       "id": "2025-S046-1",
       "section": "학생선택",
       "area": "사회",
@@ -995,12 +994,29 @@
       "group_id": "2025-G02"
     },
     {
-      "id": "2025-S050",
+      "id": "2025-S050-1",
       "section": "학생선택",
       "area": "사회",
       "type": "일반",
-      "name": "사회와 문화, 현대사회와 윤리",
-      "base_credit": 4,
+      "name": "사회와 문화",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2025-G02"
+    },
+    {
+      "id": "2025-S050-2",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "일반",
+      "name": "현대사회와 윤리",
+      "base_credit": 3,
       "op_credit": 3,
       "semesters": [
         {
@@ -1046,12 +1062,63 @@
       "group_id": "2025-G02"
     },
     {
-      "id": "2025-S053",
+      "id": "2025-S053-1",
       "section": "학생선택",
       "area": "과학",
       "type": "진로",
-      "name": "역학과 에너지, 물질과 에너지, \n세포와 물질대사, 지구시스템과학",
-      "base_credit": 4,
+      "name": "역학과 에너지",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2025-G02"
+    },
+    {
+      "id": "2025-S053-2",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "물질과 에너지",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2025-G02"
+    },
+    {
+      "id": "2025-S053-3",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "세포와 물질대사",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2025-G02"
+    },
+    {
+      "id": "2025-S053-4",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "지구시스템과학",
+      "base_credit": 3,
       "op_credit": 3,
       "semesters": [
         {
@@ -1181,571 +1248,3 @@
         }
       ],
       "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S061",
-      "section": "학생선택",
-      "area": "수학",
-      "type": "융합",
-      "name": "수학과제 탐구",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S062",
-      "section": "학생선택",
-      "area": "영어",
-      "type": "일반",
-      "name": "영어 독해와 작문",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S063",
-      "section": "학생선택",
-      "area": "영어",
-      "type": "진로",
-      "name": "영미 문학 읽기",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S064",
-      "section": "학생선택",
-      "area": "사회",
-      "type": "진로",
-      "name": "한국지리 탐구, 동아시아 역사 기행, \n법과 사회, 윤리와 사상",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S065",
-      "section": "학생선택",
-      "area": "사회",
-      "type": "융합",
-      "name": "금융과 경제생활",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S066",
-      "section": "학생선택",
-      "area": "과학",
-      "type": "진로",
-      "name": "전자기와 양자, 화학 반응의 세계, \n생물의 유전, 행성우주과학",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S067",
-      "section": "학생선택",
-      "area": "기술.가정/정보",
-      "type": "진로",
-      "name": "데이터 과학",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S068",
-      "section": "학생선택",
-      "area": "제2외국어/한문",
-      "type": "진로",
-      "name": "중국어회화",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S069",
-      "section": "학생선택",
-      "area": "제2외국어/한문",
-      "type": "진로",
-      "name": "일본어회화",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S070",
-      "section": "학생선택",
-      "area": "제2외국어/한문",
-      "type": "융합",
-      "name": "언어생활과 한자",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-1",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G04"
-    },
-    {
-      "id": "2025-S071",
-      "section": "학생선택",
-      "area": "국어",
-      "type": "진로",
-      "name": "직무 의사소통",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S072",
-      "section": "학생선택",
-      "area": "국어",
-      "type": "융합",
-      "name": "매체 의사소통",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S073",
-      "section": "학생선택",
-      "area": "수학",
-      "type": "진로",
-      "name": "인공지능 수학",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S074",
-      "section": "학생선택",
-      "area": "수학",
-      "type": "융합",
-      "name": "수학과 문화",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S075",
-      "section": "학생선택",
-      "area": "영어",
-      "type": "진로",
-      "name": "심화 영어",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S076",
-      "section": "학생선택",
-      "area": "영어",
-      "type": "융합",
-      "name": "세계 문화와 영어",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S077",
-      "section": "학생선택",
-      "area": "사회",
-      "type": "진로",
-      "name": "국제 관계의 이해",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S078",
-      "section": "학생선택",
-      "area": "사회",
-      "type": "융합",
-      "name": "여행지리, 윤리문제 탐구, 세계유산탐구*",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S079",
-      "section": "학생선택",
-      "area": "과학",
-      "type": "진로",
-      "name": "전자기와 양자, 화학 반응의 시계, \n생물의 유전, 행성우주과학",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S080",
-      "section": "학생선택",
-      "area": "과학",
-      "type": "융합",
-      "name": "기후변화와 환경생태",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S081",
-      "section": "학생선택",
-      "area": "기술.가정/정보",
-      "type": "융합",
-      "name": "소프트웨어와 생활",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S082",
-      "section": "학생선택",
-      "area": "제2외국어/한문",
-      "type": "융합",
-      "name": "중국 문화",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S083",
-      "section": "학생선택",
-      "area": "제2외국어/한문",
-      "type": "융합",
-      "name": "일본 문화",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    },
-    {
-      "id": "2025-S084",
-      "section": "학생선택",
-      "area": "제2외국어/한문",
-      "type": "진로",
-      "name": "한문 고전 읽기",
-      "base_credit": 4,
-      "op_credit": 3,
-      "semesters": [
-        {
-          "sem": "3-2",
-          "credit": 3
-        }
-      ],
-      "notes": [],
-      "group_id": "2025-G05"
-    }
-  ],
-  "groups": [
-    {
-      "id": "2025-H01",
-      "kind": "school_subgroup",
-      "total_credit": 3,
-      "pick_per_sem": [
-        {
-          "sem": "3-1",
-          "pick": 1
-        }
-      ],
-      "subject_ids": [
-        "2025-S039",
-        "2025-S040"
-      ]
-    },
-    {
-      "id": "2025-G01",
-      "total_credit": 12,
-      "pick_per_sem": [
-        {
-          "sem": "2-1",
-          "pick": 3
-        }
-      ],
-      "row_range": [
-        46,
-        51
-      ],
-     "subject_ids": [
-        "2025-S042",
-        "2025-S043",
-        "2025-S044",
-        "2025-S045-1",
-        "2025-S045-2",
-        "2025-S046-1", 
-        "2025-S046-2",  
-        "2025-S046-3",  
-        "2025-S047-1",
-        "2025-S047-2",
-        "2025-S047-3",
-        "2025-S047-4"
-      ]
-    },
-    {
-      "id": "2025-G02",
-      "total_credit": 9,
-      "pick_per_sem": [
-        {
-          "sem": "2-2",
-          "pick": 3
-        }
-      ],
-      "row_range": [
-        52,
-        58
-      ],
-      "subject_ids": [
-        "2025-S048",
-        "2025-S049",
-        "2025-S050",
-        "2025-S051",
-        "2025-S052",
-        "2025-S053",
-        "2025-S054"
-      ]
-    },
-    {
-      "id": "2025-G03",
-      "total_credit": 4,
-      "pick_per_sem": [
-        {
-          "sem": "2-1",
-          "pick": 1
-        },
-        {
-          "sem": "2-2",
-          "pick": 1
-        }
-      ],
-      "row_range": [
-        59,
-        62
-      ],
-      "subject_ids": [
-        "2025-S055",
-        "2025-S056",
-        "2025-S057",
-        "2025-S058"
-      ]
-    },
-    {
-      "id": "2025-G04",
-      "total_credit": 12,
-      "pick_per_sem": [
-        {
-          "sem": "3-1",
-          "pick": 4
-        }
-      ],
-      "row_range": [
-        63,
-        74
-      ],
-      "subject_ids": [
-        "2025-S059",
-        "2025-S060",
-        "2025-S061",
-        "2025-S062",
-        "2025-S063",
-        "2025-S064",
-        "2025-S065",
-        "2025-S066",
-        "2025-S067",
-        "2025-S068",
-        "2025-S069",
-        "2025-S070"
-      ]
-    },
-    {
-      "id": "2025-G05",
-      "total_credit": 15,
-      "pick_per_sem": [
-        {
-          "sem": "3-2",
-          "pick": 5
-        }
-      ],
-      "row_range": [
-        75,
-        88
-      ],
-      "subject_ids": [
-        "2025-S071",
-        "2025-S072",
-        "2025-S073",
-        "2025-S074",
-        "2025-S075",
-        "2025-S076",
-        "2025-S077",
-        "2025-S078",
-        "2025-S079",
-        "2025-S080",
-        "2025-S081",
-        "2025-S082",
-        "2025-S083",
-        "2025-S084"
-      ]
-    }
-  ],
-  "combined_areas": {
-    "기술·가정/정보/제2외국어/교양": {
-      "total": 36,
-      "required": 16,
-      "members": [
-        "기술.가정/정보",
-        "교양",
-        "제2외국어/한문"
-      ]
-    }
-  }
-}
