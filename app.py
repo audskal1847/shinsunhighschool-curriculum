@@ -288,15 +288,13 @@ def page_home():
             unsafe_allow_html=True,
         )
     with c2:
-        n_school = sum(1 for s in curriculum["subjects"] if s["section"] == "학교지정")
         st.markdown(
-            f"""<div class='big-card'><h2>{n_school}</h2><p>학교지정 과목</p><span class='sub'>필수 이수</span></div>""",
+            f"""<div class='big-card'><h2>122</h2><p>학교지정 학점</p><span class='sub'>필수 이수 (40과목)</span></div>""",
             unsafe_allow_html=True,
         )
     with c3:
-        n_select = sum(1 for s in curriculum["subjects"] if s["section"] == "학생선택")
         st.markdown(
-            f"""<div class='big-card'><h2>{n_select}</h2><p>학생선택 과목</p><span class='sub'>그룹별 택N</span></div>""",
+            f"""<div class='big-card'><h2>52</h2><p>학생선택 학점</p><span class='sub'>택 18과목</span></div>""",
             unsafe_allow_html=True,
         )
 
