@@ -322,23 +322,29 @@ def page_core_path():
         ("🎨 예술 교과", ["예술"], "음악·미술 학기 교차 이수 / 진로선택 과목"),
         ("📐 기술·가정/정보/제2외국어/교양", ["기술.가정/정보","교양","제2외국어/한문"], "공통 필수 16학점 (세 교과군 합산)"),
     ]
-    cols = st.columns(3)
+   cols = st.columns(3)
     for i, (title, area_list, desc) in enumerate(groups_display):
         with cols[i % 3]:
-            req = None
+            req = 0
             total = 0
             for a in area_list:
                 if a in areas:
                     if areas[a].get("required"):
-                        req = areas[a]["required"]
+                        req += areas[a]["required"]
                     if areas[a].get("total"):
                         total += areas[a]["total"]
+            
+            # 기술/교양/제2외국어 공동 합계 예외 처리
             if "공동 합계" in str([areas[a].get("note","") for a in area_list if a in areas]):
                 total = areas[area_list[0]].get("total") or 0
+                req = areas[area_list[0]].get("required") or 0
+            
+            req_str = req if req > 0 else "-"
+            
             st.markdown(f"""
             <div class='subject-card' style='min-height:140px'>
               <div style='font-weight:700; font-size:16px; margin-bottom:6px'>{title}</div>
-              <div style='color:#4f46e5; font-weight:600'>필수 {req or '-'}학점 · 총 운영 {total}학점</div>
+              <div style='color:#4f46e5; font-weight:600'>필수 {req_str}학점 · 총 운영 {total}학점</div>
               <div style='color:#6b7280; font-size:13px; margin-top:8px'>{desc}</div>
             </div>
             """, unsafe_allow_html=True)
