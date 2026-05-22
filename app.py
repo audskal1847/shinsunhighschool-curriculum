@@ -462,6 +462,11 @@ def page_simulator():
 
     st.markdown("### 🔵 학생선택 묶음 (그룹별 택N)")
     for g in curriculum["groups"]:
+        # 💡 [추가된 로직] 2025학년도 입학생(현재 2학년)이면 2학년 그룹은 건너뜀
+        if st.session_state.entry_year == 2025:
+            if any(gid in g["id"] for gid in ["G01", "G02", "G03"]):
+                continue
+        
         if g["id"].startswith("2025-G") or g["id"].startswith("2026-G"):
             render_group_picker(g, selected)
     st.markdown("### 🟣 학교지정 내 택N 묶음 (제2외국어 등)")
