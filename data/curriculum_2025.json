@@ -694,10 +694,6 @@
       "op_credit": 3,
       "semesters": [
         {
-          "sem": "1-1",
-          "credit": 3
-        },
-        {
           "sem": "1-2",
           "credit": 3
         }
