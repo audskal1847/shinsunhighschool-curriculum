@@ -1234,11 +1234,45 @@
       "group_id": "2025-G04"
     },
     {
-      "id": "2025-S060",
+      "id": "2025-S060-1",
       "section": "학생선택",
       "area": "수학",
       "type": "진로",
-      "name": "기하 ,미적분Ⅱ, 경제 수학",
+      "name": "기하",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2025-G04"
+    },
+    {
+      "id": "2025-S060-2",
+      "section": "학생선택",
+      "area": "수학",
+      "type": "진로",
+      "name": "미적분Ⅱ",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2025-G04"
+    },
+    {
+      "id": "2025-S060-3",
+      "section": "학생선택",
+      "area": "수학",
+      "type": "진로",
+      "name": "경제 수학",
       "base_credit": 4,
       "op_credit": 3,
       "semesters": [
@@ -1951,7 +1985,9 @@
       ],
       "subject_ids": [
         "2025-S059",
-        "2025-S060",
+        "2025-S060-1",
+        "2025-S060-2",
+        "2025-S060-3",
         "2025-S061",
         "2025-S062",
         "2025-S063",
