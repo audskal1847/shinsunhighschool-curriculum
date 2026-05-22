@@ -805,11 +805,11 @@
       "group_id": "2026-G02"
     },
     {
-      "id": "2026-S046",
+      "id": "2026-S046-1",
       "section": "학생선택",
       "area": "사회",
       "type": "일반",
-      "name": "세계시민과 지리, 세계사",
+      "name": "세계시민과 지리",
       "base_credit": 4,
       "op_credit": 4,
       "semesters": [
@@ -822,11 +822,28 @@
       "group_id": "2026-G02"
     },
     {
-      "id": "2026-S047",
+      "id": "2026-S046-2",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "일반",
+      "name": "세계사",
+      "base_credit": 4,
+      "op_credit": 4,
+      "semesters": [
+        {
+          "sem": "2-1",
+          "credit": 4
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G02"
+    },
+    {
+      "id": "2026-S047-1",
       "section": "학생선택",
       "area": "사회",
       "type": "진로",
-      "name": "경제, 정치, 윤리와 사상",
+      "name": "경제",
       "base_credit": 4,
       "op_credit": 4,
       "semesters": [
@@ -839,11 +856,96 @@
       "group_id": "2026-G02"
     },
     {
-      "id": "2026-S048",
+      "id": "2026-S047-2",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "진로",
+      "name": "정치",
+      "base_credit": 4,
+      "op_credit": 4,
+      "semesters": [
+        {
+          "sem": "2-1",
+          "credit": 4
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G02"
+    },
+    {
+      "id": "2026-S047-3",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "진로",
+      "name": "윤리와 사상",
+      "base_credit": 4,
+      "op_credit": 4,
+      "semesters": [
+        {
+          "sem": "2-1",
+          "credit": 4
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G02"
+    },
+    {
+      "id": "2026-S048-1",
       "section": "학생선택",
       "area": "과학",
       "type": "일반",
-      "name": "물리학, 화학, 생명과학, 지구과학",
+      "name": "물리학",
+      "base_credit": 4,
+      "op_credit": 4,
+      "semesters": [
+        {
+          "sem": "2-1",
+          "credit": 4
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G02"
+    },
+    {
+      "id": "2026-S048-2",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "일반",
+      "name": "화학",
+      "base_credit": 4,
+      "op_credit": 4,
+      "semesters": [
+        {
+          "sem": "2-1",
+          "credit": 4
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G02"
+    },
+    {
+      "id": "2026-S048-3",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "일반",
+      "name": "생명과학",
+      "base_credit": 4,
+      "op_credit": 4,
+      "semesters": [
+        {
+          "sem": "2-1",
+          "credit": 4
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G02"
+    },
+    {
+      "id": "2026-S048-4",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "일반",
+      "name": "지구과학",
       "base_credit": 4,
       "op_credit": 4,
       "semesters": [
@@ -885,12 +987,29 @@
       "group_id": "2026-G03"
     },
     {
-      "id": "2026-S051",
+      "id": "2026-S051-1",
       "section": "학생선택",
       "area": "사회",
       "type": "일반",
-      "name": "사회와 문화, 현대사회와 윤리",
-      "base_credit": 4,
+      "name": "사회와 문화",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G03"
+    },
+    {
+      "id": "2026-S051-2",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "일반",
+      "name": "현대사회와 윤리",
+      "base_credit": 3,
       "op_credit": 3,
       "semesters": [
         {
@@ -936,12 +1055,63 @@
       "group_id": "2026-G03"
     },
     {
-      "id": "2026-S054",
+      "id": "2026-S054-1",
       "section": "학생선택",
       "area": "과학",
       "type": "진로",
-      "name": "역학과 에너지, 물질과 에너지, \n세포와 물질대사, 지구시스템과학",
-      "base_credit": 4,
+      "name": "역학과 에너지",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G03"
+    },
+    {
+      "id": "2026-S054-2",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "물질과 에너지",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G03"
+    },
+    {
+      "id": "2026-S054-3",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "세포와 물질대사",
+      "base_credit": 3,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "2-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G03"
+    },
+    {
+      "id": "2026-S054-4",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "지구시스템과학",
+      "base_credit": 3,
       "op_credit": 3,
       "semesters": [
         {
@@ -1057,11 +1227,62 @@
       "group_id": "2026-G05"
     },
     {
-      "id": "2026-S061",
+      "id": "2026-S061-1",
       "section": "학생선택",
       "area": "수학",
       "type": "진로",
-      "name": "기하 ,미적분Ⅱ, 경제 수학, 인공지능수학",
+      "name": "기하",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S061-2",
+      "section": "학생선택",
+      "area": "수학",
+      "type": "진로",
+      "name": "미적분Ⅱ",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S061-3",
+      "section": "학생선택",
+      "area": "수학",
+      "type": "진로",
+      "name": "경제 수학",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S061-4",
+      "section": "학생선택",
+      "area": "수학",
+      "type": "진로",
+      "name": "인공지능 수학",
       "base_credit": 4,
       "op_credit": 3,
       "semesters": [
@@ -1125,11 +1346,11 @@
       "group_id": "2026-G05"
     },
     {
-      "id": "2026-S065",
+      "id": "2026-S065-1",
       "section": "학생선택",
       "area": "사회",
       "type": "진로",
-      "name": "한국지리 탐구, 동아시아 역사 기행, \n법과 사회, 인문학과 윤리",
+      "name": "한국지리 탐구",
       "base_credit": 4,
       "op_credit": 3,
       "semesters": [
@@ -1142,11 +1363,113 @@
       "group_id": "2026-G05"
     },
     {
-      "id": "2026-S066",
+      "id": "2026-S065-2",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "진로",
+      "name": "동아시아 역사 기행",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S065-3",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "진로",
+      "name": "법과 사회",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S065-4",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "진로",
+      "name": "인문학과 윤리",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S066-1",
       "section": "학생선택",
       "area": "과학",
       "type": "진로",
-      "name": "전자기와 양자, 화학 반응의 세계, \n생물의 유전, 행성우주과학",
+      "name": "전자기와 양자",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S066-2",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "화학 반응의 세계",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S066-3",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "생물의 유전",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-1",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G05"
+    },
+    {
+      "id": "2026-S066-4",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "행성우주과학",
       "base_credit": 4,
       "op_credit": 3,
       "semesters": [
@@ -1324,11 +1647,11 @@
       "group_id": "2026-G06"
     },
     {
-      "id": "2026-S077",
+      "id": "2026-S077-1",
       "section": "학생선택",
       "area": "사회",
       "type": "융합",
-      "name": "여행지리, 윤리문제 탐구, 세계유산탐구*\n금융과 경제생활",
+      "name": "여행지리",
       "base_credit": 4,
       "op_credit": 3,
       "semesters": [
@@ -1341,11 +1664,113 @@
       "group_id": "2026-G06"
     },
     {
-      "id": "2026-S078",
+      "id": "2026-S077-2",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "융합",
+      "name": "윤리문제 탐구",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G06"
+    },
+    {
+      "id": "2026-S077-3",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "융합",
+      "name": "세계유산탐구*",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G06"
+    },
+    {
+      "id": "2026-S077-4",
+      "section": "학생선택",
+      "area": "사회",
+      "type": "융합",
+      "name": "금융과 경제생활",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G06"
+    },
+    {
+      "id": "2026-S078-1",
       "section": "학생선택",
       "area": "과학",
       "type": "진로",
-      "name": "전자기와 양자, 화학 반응의 세계, \n생물의 유전, 행성우주과학",
+      "name": "전자기와 양자",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G06"
+    },
+    {
+      "id": "2026-S078-2",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "화학 반응의 세계",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G06"
+    },
+    {
+      "id": "2026-S078-3",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "생물의 유전",
+      "base_credit": 4,
+      "op_credit": 3,
+      "semesters": [
+        {
+          "sem": "3-2",
+          "credit": 3
+        }
+      ],
+      "notes": [],
+      "group_id": "2026-G06"
+    },
+    {
+      "id": "2026-S078-4",
+      "section": "학생선택",
+      "area": "과학",
+      "type": "진로",
+      "name": "행성우주과학",
       "base_credit": 4,
       "op_credit": 3,
       "semesters": [
@@ -1476,9 +1901,15 @@
         "2026-S043",
         "2026-S044",
         "2026-S045",
-        "2026-S046",
-        "2026-S047",
-        "2026-S048"
+        "2026-S046-1",
+        "2026-S046-2",
+        "2026-S047-1",
+        "2026-S047-2",
+        "2026-S047-3",
+        "2026-S048-1",
+        "2026-S048-2",
+        "2026-S048-3",
+        "2026-S048-4"
       ]
     },
     {
@@ -1497,10 +1928,14 @@
       "subject_ids": [
         "2026-S049",
         "2026-S050",
-        "2026-S051",
+        "2026-S051-1",
+        "2026-S051-2",
         "2026-S052",
         "2026-S053",
-        "2026-S054",
+        "2026-S054-1",
+        "2026-S054-2",
+        "2026-S054-3",
+        "2026-S054-4",
         "2026-S055"
       ]
     },
@@ -1543,12 +1978,21 @@
       ],
       "subject_ids": [
         "2026-S060",
-        "2026-S061",
+        "2026-S061-1",
+        "2026-S061-2",
+        "2026-S061-3",
+        "2026-S061-4",
         "2026-S062",
         "2026-S063",
         "2026-S064",
-        "2026-S065",
-        "2026-S066",
+        "2026-S065-1",
+        "2026-S065-2",
+        "2026-S065-3",
+        "2026-S065-4",
+        "2026-S066-1",
+        "2026-S066-2",
+        "2026-S066-3",
+        "2026-S066-4",
         "2026-S067",
         "2026-S068",
         "2026-S069",
@@ -1575,8 +2019,14 @@
         "2026-S074",
         "2026-S075",
         "2026-S076",
-        "2026-S077",
-        "2026-S078",
+        "2026-S077-1",
+        "2026-S077-2",
+        "2026-S077-3",
+        "2026-S077-4",
+        "2026-S078-1",
+        "2026-S078-2",
+        "2026-S078-3",
+        "2026-S078-4",
         "2026-S079",
         "2026-S080",
         "2026-S081",
