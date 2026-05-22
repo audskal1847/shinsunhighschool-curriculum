@@ -352,16 +352,17 @@ def page_core_path():
     st.markdown("---")
     st.markdown("### 📋 영역별 상세 학점")
     rows = []
+    # curriculum["area_requirements"]는 이제 수정된 JSON의 값을 가지고 있습니다.
     for a, info in areas.items():
         rows.append({
             "교과(군)": a,
             "총 운영학점": info.get("total"),
             "필수 이수학점": info.get("required"),
-            "비고": info.get("note","")
+            "비고": info.get("note", "")
         })
+    
+    # st.dataframe이 수정된 rows 데이터를 사용하도록 합니다.
     st.dataframe(rows, use_container_width=True, hide_index=True)
-    st.info("💡 **학년별 학기당 이수학점**: 1학년 31학점 / 2학년 30학점 / 3학년 26학점 + 창의적 체험활동 학기당 3학점")
-
 
 # ----------------- 페이지: 학년별 교과목 탐색 -----------------
 def page_explore():
