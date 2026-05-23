@@ -56,8 +56,8 @@
     {"id": "2026-S037", "section": "학교지정", "area": "기술.가정/정보", "type": "일반", "name": "정보", "base_credit": 4, "op_credit": 3, "semesters": [{"sem": "1-1", "credit": 3}], "notes": [], "group_id": null},
     {"id": "2026-S038", "section": "학교지정", "area": "교양", "type": "일반", "name": "진로와 직업", "base_credit": 3, "op_credit": 2, "semesters": [{"sem": "1-2", "credit": 2}], "notes": [], "group_id": null},
     {"id": "2026-S039", "section": "학교지정", "area": "교양", "type": "융합", "name": "학문의 기초와 융합*", "base_credit": 2, "op_credit": 1, "semesters": [{"sem": "1-2", "credit": 1}], "notes": [], "group_id": null},
-    {"id": "2026-S040", "section": "학교지정", "area": "제2외국어/한문", "type": "일반", "name": "일본어", "base_credit": 4, "op_credit": 3, "semesters": [{"sem": "3-1", "credit": 3}, {"sem": "3-2", "credit": 3}], "notes": [{"sem": "3-1", "note": "일본어/중국어 중 택1"}, {"sem": "3-2", "note": "일본어/중국어 중 택1"}], "group_id": "2026-H01"},
-    {"id": "2026-S041", "section": "학교지정", "area": "제2외국어/한문", "type": "일반", "name": "중국어", "base_credit": 4, "op_credit": 3, "semesters": [{"sem": "3-1", "credit": 3}, {"sem": "3-2", "credit": 3}], "notes": [{"sem": "3-1", "note": "일본어/중국어 중 택1"}, {"sem": "3-2", "note": "일본어/중국어 중 택1"}], "group_id": "2026-H01"},
+    {"id": "2026-S040", "section": "학교지정", "area": "제2외국어/한문", "type": "일반", "name": "일본어", "base_credit": 4, "op_credit": 3, "semesters": [], "notes": [{"sem": "3-annual", "note": "일본어/중국어 중 연간 1과목 택"}], "group_id": "2026-H01"},
+    {"id": "2026-S041", "section": "학교지정", "area": "제2외국어/한문", "type": "일반", "name": "중국어", "base_credit": 4, "op_credit": 3, "semesters": [], "notes": [{"sem": "3-annual", "note": "일본어/중국어 중 연간 1과목 택"}], "group_id": "2026-H01"},
     {"id": "2026-S042", "section": "학교지정", "area": "제2외국어/한문", "type": "일반", "name": "한문", "base_credit": 4, "op_credit": 3, "semesters": [{"sem": "3-2", "credit": 3}], "notes": [], "group_id": null},
     {"id": "2026-S043", "section": "학생선택", "area": "국어", "type": "진로", "name": "주제 탐구 독서", "base_credit": 4, "op_credit": 4, "semesters": [], "notes": [], "group_id": "2026-G02"},
     {"id": "2026-S044", "section": "학생선택", "area": "국어", "type": "융합", "name": "언어생활 탐구", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
@@ -127,11 +127,11 @@
     {"id": "2026-S083", "section": "학생선택", "area": "제2외국어/한문", "type": "진로", "name": "한문 고전 읽기", "base_credit": 4, "op_credit": 3, "semesters": [{"sem": "3-2", "credit": 3}], "notes": [], "group_id": "2026-G06"}
   ],
   "groups": [
-    {"id": "2026-H01", "kind": "school_subgroup", "total_credit": 3, "pick_per_sem": [{"sem": "3-1", "pick": 1}, {"sem": "3-2", "pick": 1}], "subject_ids": ["2026-S040", "2026-S041"]},
+    {"id": "2026-H01", "kind": "school_subgroup", "total_credit": 3, "pick_per_sem": [{"sem": "3-annual", "pick": 1}], "subject_ids": ["2026-S040", "2026-S041"]},
     {"id": "2026-G02", "total_credit": 12, "pick_per_sem": [{"sem": "2-1", "pick": 3}], "subject_ids": ["2026-S043", "2026-S044", "2026-S045", "2026-S046-1", "2026-S046-2", "2026-S047-1", "2026-S047-2", "2026-S047-3", "2026-S048-1", "2026-S048-2", "2026-S048-3", "2026-S048-4"]},
     {"id": "2026-G03", "total_credit": 9, "pick_per_sem": [{"sem": "2-2", "pick": 3}], "subject_ids": ["2026-S049", "2026-S050", "2026-S051-1", "2026-S051-2", "2026-S052", "2026-S053", "2026-S054-1", "2026-S054-2", "2026-S054-3", "2026-S054-4", "2026-S055"]},
     {"id": "2026-G04", "total_credit": 4, "pick_per_sem": [{"sem": "2-1", "pick": 1}, {"sem": "2-2", "pick": 1}], "subject_ids": ["2026-S056", "2026-S057", "2026-S058", "2026-S059"]},
-    {"id": "2026-G05", "total_credit": 12, "pick_per_sem": [{"sem": "3-1", "pick": 4}], "subject_ids": ["2026-S060", "2026-S061-1", "2026-S061-2", "2026-S061-3", "2026-S061-4", "2026-S062", "2026-S063", "2026-S064", "2026-S065-1", "2026-S065-2", "2026-S065-3", "2026-S065-4", "2026-S066-1", "2026-S066-2", "2026-S066-3", "2026-S066-4", "2026-S067", "2026-S068", "2026-S069", "2026-S070"]},
+    {"id": "2026-G05", "total_credit": 12, "pick_per_sem": [{"sem": "3-1", "pick": 4}], "subject_ids": ["2026-S060", "2026-S061-1", "2026-S061-2", "2026-S061-3", "2026-S061-4", "2026-S062", "2026-S063", "2026-S064-1", "2026-S064-2", "2026-S064-3", "2026-S064-4", "2026-S065", "2026-S066-1", "2026-S066-2", "2026-S066-3", "2026-S066-4", "2026-S067", "2026-S068", "2026-S069", "2026-S070"]},
     {"id": "2026-G06", "total_credit": 15, "pick_per_sem": [{"sem": "3-2", "pick": 5}], "subject_ids": ["2026-S071", "2026-S072", "2026-S073", "2026-S074", "2026-S075", "2026-S076", "2026-S077-1", "2026-S077-2", "2026-S077-3", "2026-S077-4", "2026-S078-1", "2026-S078-2", "2026-S078-3", "2026-S078-4", "2026-S079", "2026-S080", "2026-S081", "2026-S082", "2026-S083"]}
   ],
   "combined_areas": {
