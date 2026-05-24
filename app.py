@@ -63,29 +63,32 @@ def load_teacher_comments():
             return json.load(f)
     return {}
 
-# ----------------- 전역 CSS 스타일 (버튼 및 레이아웃) -----------------
+# ----------------- 전역 CSS 스타일 -----------------
 st.markdown("""
 <style>
-/* 💡 [버튼 스타일] 글씨를 더 크고 아주 굵게 설정 */
+/* 💡 [수정] 버튼 폰트 사이즈와 두께 대폭 강화 */
 .stButton > button[kind="primary"] {
-    font-size: 24px !important;
+    font-size: 28px !important;
     font-weight: 900 !important;
-    height: 70px !important;
+    height: 80px !important;
     border-radius: 12px !important;
     letter-spacing: -0.5px !important;
+    color: white !important;
+    background-color: #ff4b4b !important;
+    border: none !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background-color: #ff2b2b !important;
 }
 
-/* 카드 및 기타 UI 스타일 */
 .big-card { background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 .subject-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
 .badge { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-right: 4px; }
 .badge-area { background: #f3f4f6; color: #374151; }
 .badge-type-공통 { background: #dbeafe; color: #1e40af; }
-.badge-req { background: #dcfce7; color: #166534; }
-.badge-sel { background: #fef9c3; color: #854d0e; }
 .title-gradient { background: linear-gradient(90deg, #4f46e5 0%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
-.landing-title-pink { color: #f4a8b8; font-size: 46px; font-weight: 900; margin: 0; letter-spacing: -1px; line-height: 1.1; }
-.landing-title-black { color: #1f2937; font-size: 40px; font-weight: 900; margin: 5px 0 0 0; letter-spacing: -1px; }
+.landing-title-pink { color: #f4a8b8; font-size: 52px; font-weight: 900; margin: 0; letter-spacing: -1px; }
+.landing-title-black { color: #1f2937; font-size: 44px; font-weight: 900; margin: 5px 0 0 0; letter-spacing: -1px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -97,7 +100,7 @@ if "selected_subjects" not in st.session_state: st.session_state.selected_subjec
 # ----------------- 하단 푸터 함수 -----------------
 def render_made_by():
     st.markdown("""
-        <div style='text-align: center; padding: 24px 0 16px 0; border-top: 2px solid #e5e7eb; margin-top: 80px;'>
+        <div style='text-align: center; padding: 24px 0 16px 0; border-top: 2px solid #e5e7eb; margin-top: 60px;'>
             <p style='font-size: 20px; margin: 0; color: #374151; font-weight: 900;'>
                 만든 이: 신선여자고등학교 교육과정부 & 교무부
             </p>
@@ -111,9 +114,8 @@ def render_made_by():
 with st.sidebar:
     st.markdown("<p style='font-size: 20px; color: #555555; font-weight: bold;'>⭐주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", unsafe_allow_html=True)
     st.markdown("---")
-
     if st.session_state.get("year_selected", False):
-        year = st.radio("입학년도 선택", [2025, 2026], format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y==2025 else '현재 1학년'})", index=0 if st.session_state.entry_year != 2026 else 1)
+        year = st.radio("입학년도 선택", [2025, 2026], format_func=lambda y: f"{y}학년도 ({'2학년' if y==2025 else '1학년'})", index=0 if st.session_state.entry_year != 2026 else 1)
         st.session_state.entry_year = year
         st.markdown("---")
         page = st.radio("메뉴", ["🏠 홈", "🗺️ 핵심 이수 경로", "📚 학년별 교과목 탐색", "📅 시간표 시뮬레이터", "🎓 2028 대입 권장 과목", "🖨️ 결과 출력"])
@@ -121,6 +123,9 @@ with st.sidebar:
         st.info("👉 입학년도를 먼저 선택하세요.")
         page = None
         year = st.session_state.get("entry_year", 2025)
+
+# (이후 함수 및 로직은 기존과 동일)
+# ... [이하 기존 코드 그대로 유지] ...
 
 curriculum = load_curriculum(year)
 career = load_career()
