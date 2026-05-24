@@ -2,6 +2,7 @@ import streamlit as st
 import json, os
 from pathlib import Path
 from collections import defaultdict
+import base64 # 💡 이미지 변환을 위해 추가된 모듈
 
 # ----------------- 페이지 기본 설정 -----------------
 st.set_page_config(
@@ -36,9 +37,18 @@ def load_teacher_comments():
             return json.load(f)
     return {}
 
+# 💡 [추가] 이미지를 Base64 데이터로 변환하는 함수 (배경 CSS용)
+@st.cache_data
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
 # ----------------- 전역 CSS 스타일 -----------------
 st.markdown("""
 <style>
+/* 전역 스타일 */
+body { color: #1f2937; }
 .big-card { background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; transition: all 0.2s; height: 100%; }
 .big-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(99,102,241,.15); }
 .big-card h2 { background: linear-gradient(90deg, #4f46e5, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 56px; margin: 0; font-weight: 800; }
@@ -60,8 +70,40 @@ st.markdown("""
 .landing-title-pink { color: #f4a8b8; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -1px; }
 .landing-title-black { color: #1f2937; font-size: 46px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: -1px; }
 .stButton > button[kind="primary"] { font-size: 20px !important; font-weight: 700 !important; }
+
+/* 💡 [핵심 추가] 전체 페이지 흐릿한 배경 CSS (Ghost Background) */
+[data-testid="stAppViewContainer"]::before {
+    content: "";
+    background-image: url("data:image/png;base64,##IMAGE_BASE64##");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(10px); /* 흐릿하게 */
+    opacity: 0.15; /* 반투명하게 (유령처럼) */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* 맨 뒤로 */
+}
 </style>
 """, unsafe_allow_html=True)
+
+# CSS 내의 ##IMAGE_BASE64## 플레이스홀더를 실제 Base64 데이터로 치환하는 함수
+def inject_background_css():
+    school_img_path = ASSETS_DIR / "school_image.png"
+    if school_img_path.exists():
+        img_base64 = get_base64_of_bin_file(str(school_img_path))
+        # 스트림릿 앱 컨테이너에 CSS 직접 삽입
+        css_final = f"""
+        <style>
+        [data-testid="stAppViewContainer"]::before {{
+            background-image: url("data:image/png;base64,{img_base64}");
+        }}
+        </style>
+        """
+        st.markdown(css_final, unsafe_allow_html=True)
 
 # ----------------- 세션 상태 초기화 -----------------
 if "entry_year" not in st.session_state: st.session_state.entry_year = 2025
@@ -114,9 +156,12 @@ SEM_LABELS = {
     "3-annual": "3학년 (연간)"
 }
 
-# ---------------- 페이지: 랜딩 (학교 전경 이미지 추가) ----------------
+# ---------------- 페이지: 랜딩 (학교 전경 배경화 적용, 이미지 설명 삭제) ----------------
 def page_landing():
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    # 💡 배경 CSS 주입
+    inject_background_css()
+
+    st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
     
     # 로고 + 학교명 영역
     pad_l, col_logo, col_title, pad_r = st.columns([2, 1.2, 2.8, 1.5], gap="small")
@@ -127,17 +172,12 @@ def page_landing():
     with col_title:
         st.markdown("""<div style='padding: 20px 0 0 0;'><h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2></div>""", unsafe_allow_html=True)
 
-    st.markdown("---")
+    # st.markdown("---") # 💡 구분선 삭제 (더 깔끔하게)
+    # 💡 [핵심 변경] 기존 중앙 이미지 렌더링 코드 전체 삭제
 
-    # 학교 전경 이미지 영역
-    school_img_path = ASSETS_DIR / "school_image.png"
-    if school_img_path.exists():
-        _, center_col, _ = st.columns([1, 6, 1])
-        with center_col:
-            st.image(str(school_img_path), use_container_width=True, caption="자랑스러운 우리 학교, 신선여자고등학교 전경")
-    
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #1f2937; font-size: 24px; font-weight: 600;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
@@ -145,7 +185,7 @@ def page_landing():
             st.session_state.entry_year = 2025
             st.session_state.year_selected = True
             st.rerun()
-        st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2026
             st.session_state.year_selected = True
@@ -209,7 +249,7 @@ def page_core_path():
 def page_explore():
     st.markdown("## 📚 학년별 교과목 탐색")
     tab1, tab2, tab3 = st.tabs(["1학년", "2학년", "3학년"])
-    for tab, grade in [(tab1,1),(tab2,2),(tab3,3)]:
+    for tab, grade in [(tab1,1),(tabTAB2,2),(tab3,3)]:
         with tab:
             sem_cols = st.columns(2)
             for idx, sem_num in enumerate([1,2]):
