@@ -26,7 +26,7 @@ def inject_global_background():
     school_img_path = ASSETS_DIR / "school_image.png"
     if school_img_path.exists():
         img_base64 = get_base64_of_bin_file(str(school_img_path))
-        # 💡 [핵심] .stApp 전체 배경으로 지정하고, 반투명한 흰색 그라데이션을 덧씌워 은은하게 만듭니다.
+        # .stApp 전체 배경으로 지정하고, 반투명한 흰색 그라데이션을 덧씌워 유령처럼 은은하게 만듭니다.
         page_bg_img = f'''
         <style>
         .stApp {{
@@ -86,8 +86,8 @@ st.markdown("""
 .title-gradient { background: linear-gradient(90deg, #4f46e5 0%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
 .alert-success { background:#f0fdf4; border-left:4px solid #22c55e; padding:12px; border-radius:8px; }
 .alert-warning { background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; border-radius:8px; }
-.landing-title-pink { color: #f4a8b8; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -1px; }
-.landing-title-black { color: #1f2937; font-size: 46px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: -1px; }
+.landing-title-pink { color: #f4a8b8; font-size: 42px; font-weight: 900; margin: 0; letter-spacing: -1px; }
+.landing-title-black { color: #1f2937; font-size: 38px; font-weight: 900; margin: 4px 0 0 0; letter-spacing: -1px; }
 .stButton > button[kind="primary"] { font-size: 20px !important; font-weight: 700 !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -99,12 +99,13 @@ if "selected_subjects" not in st.session_state: st.session_state.selected_subjec
 
 # ----------------- 하단 푸터 함수 -----------------
 def render_made_by():
+    # 💡 글씨 크기를 키우고 더 진하게(font-weight: 800) 수정했습니다.
     st.markdown("""
-        <div style='text-align: center; padding: 24px 0 16px 0; border-top: 1px solid #e5e7eb; margin-top: 40px;'>
-            <p style='font-size: 16px; margin: 0; color: #4b5563; font-weight: 600;'>
+        <div style='text-align: center; padding: 24px 0 16px 0; border-top: 2px solid #e5e7eb; margin-top: 40px;'>
+            <p style='font-size: 18px; margin: 0; color: #374151; font-weight: 800;'>
                 만든 이: 신선여자고등학교 교육과정부 & 교무부
             </p>
-            <p style='font-size: 14px; margin: 4px 0 0 0; color: #6b7280;'>
+            <p style='font-size: 16px; margin: 6px 0 0 0; color: #4b5563; font-weight: 800;'>
                 🗓️ 2026.05
             </p>
         </div>
@@ -143,36 +144,47 @@ SEM_LABELS = {
     "3-annual": "3학년 (연간)"
 }
 
-# ---------------- 페이지: 랜딩 ----------------
+# ---------------- 페이지: 랜딩 (좌/우 분할 레이아웃 적용) ----------------
 def page_landing():
-    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
+    # 수직으로 전체 블록을 중앙에 가깝게 내리기 위한 상단 여백 (Viewport Height 사용)
+    st.markdown("<div style='height: 18vh;'></div>", unsafe_allow_html=True)
     
-    # 로고 + 학교명 영역
-    pad_l, col_logo, col_title, pad_r = st.columns([2, 1.2, 2.8, 1.5], gap="small")
-    with col_logo:
+    # 💡 좌/우 및 바깥 여백을 두어 화면 정중앙 부근에 모이도록 배치
+    pad_l, col_left, col_right, pad_r = st.columns([1, 1.8, 1.8, 1], gap="large")
+    
+    with col_left:
+        # 왼쪽: 로고 + 제목
         logo_path = ASSETS_DIR / "logo.png"
-        if logo_path.exists(): st.image(str(logo_path), width=200)
-        else: st.markdown("<div style='text-align:center; font-size:100px;'>🎓</div>", unsafe_allow_html=True)
-    with col_title:
-        st.markdown("""<div style='padding: 20px 0 0 0;'><h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2></div>""", unsafe_allow_html=True)
+        if logo_path.exists(): 
+            st.image(str(logo_path), width=160)
+        else: 
+            st.markdown("<div style='font-size:80px;'>🎓</div>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='padding-top: 10px;'>
+            <h1 class='landing-title-pink'>신선여자고등학교</h1>
+            <h2 class='landing-title-black'>고교학점제 이수 가이드</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #1f2937; font-size: 22px; font-weight: 600;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    with col_right:
+        # 오른쪽: 선택 안내 문구 + 버튼 (왼쪽과 높이 균형을 맞추기 위한 여백 추가)
+        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #1f2937; font-size: 22px; font-weight: 800;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
         if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2025
             st.session_state.year_selected = True
             st.rerun()
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
         if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2026
             st.session_state.year_selected = True
             st.rerun()
     
-    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
+    # 푸터가 너무 위로 붙지 않도록 하단 여백 추가
+    st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
     render_made_by()
 
 # ----------------- 페이지: 홈 -----------------
@@ -298,7 +310,6 @@ def page_simulator():
 
     st.markdown("### 🔵 학생선택 묶음 (그룹별 택N)")
     for g in curriculum["groups"]:
-        # 💡 2학년(2025입학생)은 2학년 그룹(G01, G02, G03)을 화면에서 건너뜀
         if st.session_state.entry_year == 2025:
             if any(gid in g["id"] for gid in ["G01", "G02", "G03"]):
                 continue
@@ -326,10 +337,8 @@ def render_group_picker(g, selected):
     if len(g["pick_per_sem"]) >= 1:
         for pinfo in g["pick_per_sem"]:
             sem = pinfo["sem"]
-            # 💡 연간 선택 레이블 분기 처리
             label = "3학년 제2외국어 선택 (연간 1과목)" if sem == "3-annual" else SEM_LABELS.get(sem, sem)
             
-            # 단일 선택(selectbox) 로직
             if pinfo["pick"] == 1:
                 options = ["(선택 안 함)"] + [s["name"] for s in subs]
                 key = f"groupsel_{g['id']}_{sem}"
@@ -337,13 +346,11 @@ def render_group_picker(g, selected):
                 
                 choice = st.selectbox(f"  {label} (택1)", options, key=key, index=options.index(current_choice) if current_choice in options else 0)
                 
-                # 기존 선택 초기화 및 업데이트
                 for s in subs: selected.discard(s["id"])
                 if choice != "(선택 안 함)":
                     for s in subs:
                         if s["name"] == choice:
                             selected.add(s["id"])
-            # 다중 선택(checkbox) 로직
             else:
                 st.caption(f"※ 아래에서 정확히 **{pinfo['pick']}과목** 체크하세요.")
                 n_cols = 3
