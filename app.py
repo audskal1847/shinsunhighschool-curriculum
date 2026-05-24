@@ -2,7 +2,7 @@ import streamlit as st
 import json, os
 from pathlib import Path
 from collections import defaultdict
-import base64 # 💡 이미지 변환을 위해 추가된 모듈
+import base64
 
 # ----------------- 페이지 기본 설정 -----------------
 st.set_page_config(
@@ -14,6 +14,34 @@ st.set_page_config(
 
 DATA_DIR = Path(__file__).parent / "data"
 ASSETS_DIR = Path(__file__).parent / "assets"
+
+# ----------------- 배경 이미지 CSS 주입 함수 -----------------
+@st.cache_data
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def inject_global_background():
+    school_img_path = ASSETS_DIR / "school_image.png"
+    if school_img_path.exists():
+        img_base64 = get_base64_of_bin_file(str(school_img_path))
+        # 💡 [핵심] .stApp 전체 배경으로 지정하고, 반투명한 흰색 그라데이션을 덧씌워 은은하게 만듭니다.
+        page_bg_img = f'''
+        <style>
+        .stApp {{
+            background-image: linear-gradient(rgba(248, 250, 255, 0.88), rgba(248, 250, 255, 0.88)), url("data:image/png;base64,{img_base64}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        '''
+        st.markdown(page_bg_img, unsafe_allow_html=True)
+
+# 배경화면 함수 실행 (전체 페이지 적용)
+inject_global_background()
 
 # ----------------- 공용 데이터 로더 -----------------
 def load_curriculum(year: int):
@@ -37,24 +65,15 @@ def load_teacher_comments():
             return json.load(f)
     return {}
 
-# 💡 [추가] 이미지를 Base64 데이터로 변환하는 함수 (배경 CSS용)
-@st.cache_data
-def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-
 # ----------------- 전역 CSS 스타일 -----------------
 st.markdown("""
 <style>
-/* 전역 스타일 */
-body { color: #1f2937; }
-.big-card { background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; transition: all 0.2s; height: 100%; }
+.big-card { background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; transition: all 0.2s; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 .big-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(99,102,241,.15); }
 .big-card h2 { background: linear-gradient(90deg, #4f46e5, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 56px; margin: 0; font-weight: 800; }
-.big-card p { color: #4b5563; margin: 8px 0 0 0; }
+.big-card p { color: #4b5563; margin: 8px 0 0 0; font-weight: 600; }
 .big-card .sub { color: #6b7280; font-size: 13px; margin-top: 4px; }
-.subject-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; transition: all 0.15s; }
+.subject-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; transition: all 0.15s; }
 .subject-card:hover { border-color: #6366f1; box-shadow: 0 4px 12px rgba(99,102,241,.08); }
 .badge { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-right: 4px; }
 .badge-area { background: #f3f4f6; color: #374151; }
@@ -70,40 +89,8 @@ body { color: #1f2937; }
 .landing-title-pink { color: #f4a8b8; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -1px; }
 .landing-title-black { color: #1f2937; font-size: 46px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: -1px; }
 .stButton > button[kind="primary"] { font-size: 20px !important; font-weight: 700 !important; }
-
-/* 💡 [핵심 추가] 전체 페이지 흐릿한 배경 CSS (Ghost Background) */
-[data-testid="stAppViewContainer"]::before {
-    content: "";
-    background-image: url("data:image/png;base64,##IMAGE_BASE64##");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: blur(10px); /* 흐릿하게 */
-    opacity: 0.15; /* 반투명하게 (유령처럼) */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1; /* 맨 뒤로 */
-}
 </style>
 """, unsafe_allow_html=True)
-
-# CSS 내의 ##IMAGE_BASE64## 플레이스홀더를 실제 Base64 데이터로 치환하는 함수
-def inject_background_css():
-    school_img_path = ASSETS_DIR / "school_image.png"
-    if school_img_path.exists():
-        img_base64 = get_base64_of_bin_file(str(school_img_path))
-        # 스트림릿 앱 컨테이너에 CSS 직접 삽입
-        css_final = f"""
-        <style>
-        [data-testid="stAppViewContainer"]::before {{
-            background-image: url("data:image/png;base64,{img_base64}");
-        }}
-        </style>
-        """
-        st.markdown(css_final, unsafe_allow_html=True)
 
 # ----------------- 세션 상태 초기화 -----------------
 if "entry_year" not in st.session_state: st.session_state.entry_year = 2025
@@ -156,12 +143,9 @@ SEM_LABELS = {
     "3-annual": "3학년 (연간)"
 }
 
-# ---------------- 페이지: 랜딩 (학교 전경 배경화 적용, 이미지 설명 삭제) ----------------
+# ---------------- 페이지: 랜딩 ----------------
 def page_landing():
-    # 💡 배경 CSS 주입
-    inject_background_css()
-
-    st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
     
     # 로고 + 학교명 영역
     pad_l, col_logo, col_title, pad_r = st.columns([2, 1.2, 2.8, 1.5], gap="small")
@@ -172,12 +156,9 @@ def page_landing():
     with col_title:
         st.markdown("""<div style='padding: 20px 0 0 0;'><h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2></div>""", unsafe_allow_html=True)
 
-    # st.markdown("---") # 💡 구분선 삭제 (더 깔끔하게)
-    # 💡 [핵심 변경] 기존 중앙 이미지 렌더링 코드 전체 삭제
-
-    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #1f2937; font-size: 24px; font-weight: 600;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #1f2937; font-size: 22px; font-weight: 600;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
@@ -191,6 +172,7 @@ def page_landing():
             st.session_state.year_selected = True
             st.rerun()
     
+    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
     render_made_by()
 
 # ----------------- 페이지: 홈 -----------------
@@ -249,7 +231,7 @@ def page_core_path():
 def page_explore():
     st.markdown("## 📚 학년별 교과목 탐색")
     tab1, tab2, tab3 = st.tabs(["1학년", "2학년", "3학년"])
-    for tab, grade in [(tab1,1),(tabTAB2,2),(tab3,3)]:
+    for tab, grade in [(tab1,1),(tab2,2),(tab3,3)]:
         with tab:
             sem_cols = st.columns(2)
             for idx, sem_num in enumerate([1,2]):
@@ -393,7 +375,6 @@ def show_summary(final_ids, auto_ids, picked_ids):
         s = next((x for x in curriculum["subjects"] if x["id"]==sid), None)
         if not s: continue
         
-        # 과목의 모든 등록된 학점을 정상적으로 합산
         if s.get("semesters"):
             for sem in s["semesters"]:
                 c = sem["credit"]
@@ -434,7 +415,6 @@ def show_summary(final_ids, auto_ids, picked_ids):
 
     issues = []
     for g in curriculum["groups"]:
-        # 2학년이 2학년 과목을 건너뛴 경우 경고 무시
         if st.session_state.entry_year == 2025 and any(gid in g["id"] for gid in ["G01", "G02", "G03"]):
             continue
             
@@ -496,7 +476,6 @@ def page_print():
     if st.button("📄 보고서 생성", type="primary"):
         html = build_report_html(name, sclass, counselor, final)
         
-        # 💡 다운로드 버튼 (워드, HTML, CSV)
         c1, c2, c3 = st.columns(3)
         with c1:
             st.download_button("📥 Word로 다운로드 (.doc)", data=html.encode('utf-8-sig'), file_name=f"신선여고_{year}입학_이수계획_{name or 'student'}.doc", mime="application/msword", use_container_width=True)
