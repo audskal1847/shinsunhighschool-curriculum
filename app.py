@@ -22,24 +22,22 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-def inject_global_background():
-    school_img_path = ASSETS_DIR / "school_image.png"
-    if school_img_path.exists():
-        img_base64 = get_base64_of_bin_file(str(school_img_path))
-        page_bg_img = f'''
-        <style>
+def inject_styles():
+    img_path = ASSETS_DIR / "school_image.png"
+    bg_css = ""
+    if img_path.exists():
+        img_b64 = get_base64_of_bin_file(str(img_path))
+        bg_css = f'''
         .stApp {{
-            background-image: linear-gradient(rgba(248, 250, 255, 0.88), rgba(248, 250, 255, 0.88)), url("data:image/png;base64,{img_base64}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
+            background-size: cover; background-attachment: fixed;
         }}
-        </style>
         '''
-        st.markdown(page_bg_img, unsafe_allow_html=True)
-
-inject_global_background()
+    st.markdown(f"""
+    <style>
+    {bg_css}
+    /* 기본 UI 스타일 정의 */
+    .subject-card {{ background: #ffffff !important; border: 2px solid #6366f1 !important; border-radius: 12px; padding
 
 # ----------------- 3. 공용 데이터 로더 -----------------
 def load_curriculum(year: int):
