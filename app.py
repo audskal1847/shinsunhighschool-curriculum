@@ -1,4 +1,4 @@
-import streamlit st
+import streamlit as st
 import json, os
 from pathlib import Path
 from collections import defaultdict
