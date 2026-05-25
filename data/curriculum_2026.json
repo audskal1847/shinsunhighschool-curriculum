@@ -67,22 +67,7 @@
     {"id": "2026-S047-1", "section": "학생선택", "area": "사회", "type": "진로", "name": "경제", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
     {"id": "2026-S047-2", "section": "학생선택", "area": "사회", "type": "진로", "name": "정치", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
     {"id": "2026-S047-3", "section": "학생선택", "area": "사회", "type": "진로", "name": "윤리와 사상", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
-   {
-  "id": "2026-S048-1",
-  "section": "학생선택",
-  "area": "과학",
-  "type": "일반",
-  "name": "물리학",
-  "base_credit": 4,
-  "op_credit": 4,
-  "semesters": [{"sem": "2-1", "credit": 4}],
-  "notes": [],
-  "group_id": "2026-G02",
-  "description": {
-    "core_idea": "역학, 전자기학, 파동, 열역학 등 자연 현상을 물리적 법칙으로 이해하고 탐구합니다.",
-    "content_elements": ["힘과 운동", "에너지와 열", "전자기장", "파동과 빛"]
-  }
-}
+    {"id": "2026-S048-1", "section": "학생선택", "area": "과학", "type": "일반", "name": "물리학", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
     {"id": "2026-S048-2", "section": "학생선택", "area": "과학", "type": "일반", "name": "화학", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
     {"id": "2026-S048-3", "section": "학생선택", "area": "과학", "type": "일반", "name": "생명과학", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
     {"id": "2026-S048-4", "section": "학생선택", "area": "과학", "type": "일반", "name": "지구과학", "base_credit": 4, "op_credit": 4, "semesters": [{"sem": "2-1", "credit": 4}], "notes": [], "group_id": "2026-G02"},
