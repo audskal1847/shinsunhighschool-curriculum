@@ -27,7 +27,6 @@ def inject_styles():
     bg_css = ""
     if img_path.exists():
         img_b64 = get_base64_of_bin_file(str(img_path))
-        # 💡 파이썬 f-string 오류 방지를 위해 모든 중괄호를 {{ }}로 이중 처리했습니다.
         bg_css = f'''
         .stApp {{
             background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
@@ -37,7 +36,7 @@ def inject_styles():
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 💡 배경 위에서 텍스트와 체크박스가 완벽하게 보이도록 불투명 화이트 스타일 적용 */
+    /* 배경 위에서 텍스트와 체크박스가 완벽하게 보이도록 불투명 화이트 스타일 적용 */
     .subject-card {{ 
         background: #ffffff !important; 
         border: 2px solid #6366f1 !important; 
@@ -51,29 +50,35 @@ def inject_styles():
     .stCheckbox label {{ font-weight: 800 !important; font-size: 16px !important; color: #000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* 🔴 [첫 번째 버튼] 2025학년도 입학생 - 빨간색 유지 */
-    .stButton:nth-of-type(1) > button {{
+    /* ------------------------------------------------------------- */
+    /* 💡 버튼 디자인 통합 및 2026학년도 버튼만 파란색 변환 (글씨체 기준 인식) */
+    .stButton > button {{
+        font-size: 24px !important; 
+        font-weight: 900 !important; 
+        height: 80px !important; 
+        border-radius: 12px !important; 
+        color: white !important; 
+        border: none !important;
+    }}
+    
+    /* 🔴 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
+    .stButton > button[kind="primary"] {{
         background-color: #ff4b4b !important;
-        color: white !important;
-        font-size: 24px !important;
-        font-weight: 900 !important;
-        height: 80px !important;
-        border-radius: 12px !important;
-        border: none !important;
     }}
-    .stButton:nth-of-type(1) > button:hover {{ background-color: #ff3333 !important; }}
+    .stButton > button[kind="primary"]:hover {{
+        background-color: #ff2b2b !important;
+    }}
 
-    /* 🔵 [두 번째 버튼] 2026학년도 입학생 - 파란색으로 변경 */
-    .stButton:nth-of-type(2) > button {{
+    /* 🔵 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
+    div.stButton:has(button p:contains("2026학년도")) > button,
+    div.stButton:has(button:contains("2026학년도")) > button {{
         background-color: #1e40af !important;
-        color: white !important;
-        font-size: 24px !important;
-        font-weight: 900 !important;
-        height: 80px !important;
-        border-radius: 12px !important;
-        border: none !important;
     }}
-    .stButton:nth-of-type(2) > button:hover {{ background-color: #1d4ed8 !important; }}
+    div.stButton:has(button p:contains("2026학년도")) > button:hover,
+    div.stButton:has(button:contains("2026학년도")) > button:hover {{
+        background-color: #1d4ed8 !important;
+    }}
+    /* ------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -151,7 +156,7 @@ career = load_career()
 comments = load_teacher_comments()
 SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1학기", "2-2":"2학년 2학기", "3-1":"3학년 1학기", "3-2":"3학년 2학기", "3-annual": "3학년 (연간)"}
 
-# ----------------- 8. 페이지: 랜딩 (좌우 정렬 균형 완벽화) -----------------
+# ----------------- 8. 페이지: 랜딩 -----------------
 def page_landing():
     st.markdown("<div style='height: 20vh;'></div>", unsafe_allow_html=True)
     c_l, c_r = st.columns([1, 1], gap="large")
@@ -163,10 +168,10 @@ def page_landing():
             st.markdown("<h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2>", unsafe_allow_html=True)
     with c_r:
         st.markdown("<p style='color: #1f2937; font-size: 24px; font-weight: 900; margin-bottom: 20px;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
-        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True):
+        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2025; st.session_state.year_selected = True; st.rerun()
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True):
+        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2026; st.session_state.year_selected = True; st.rerun()
     st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
     render_made_by()
@@ -272,10 +277,9 @@ def render_subject_card(s, sem_credit=None):
     tc = comments.get(yrk, {}).get(s["name"], None)
     tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
     
-    # 카드 디자인 시작
     st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}", unsafe_allow_html=True)
     
-    # 💡 [과학과목 상세정보 구조 적용] JSON에 description 필드가 포함된 과목은 expander를 카드 내부에 표시합니다.
+    # 과학과목 상세 정보 펼침 기능 안전 주입
     if "description" in s:
         with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
             st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
@@ -324,20 +328,17 @@ def render_group_picker(g, selected):
         sem = pinfo["sem"]
         label = "3학년 제2외국어 연간 선택과목" if sem == "3-annual" else SEM_LABELS.get(sem, sem)
         
-        # 택 1과목일 경우 -> 드롭다운 (Selectbox)
         if pinfo["pick"] == 1:
             options = ["(선택 안 함)"] + [s["name"] for s in subs]
             key = f"groupsel_{g['id']}_{sem}"
             current_choice = st.session_state.get(key, "(선택 안 함)")
             choice = st.selectbox(f"  {label} (택 1과목)", options, key=key, index=options.index(current_choice) if current_choice in options else 0)
             
-            # 다른 과목 해제 후 선택된 과목만 추가
             for s in subs: selected.discard(s["id"])
             if choice != "(선택 안 함)":
                 for s in subs:
                     if s["name"] == choice: selected.add(s["id"])
                     
-        # 택 2과목 이상일 경우 -> 체크박스 다중 선택 안정성 확보
         else:
             st.caption(f"※ 하단 목록 중 조건에 맞춰 **정확히 {pinfo['pick']}개 과목**을 체크하세요.")
             n_cols = 3
@@ -350,7 +351,6 @@ def render_group_picker(g, selected):
                     s = subs[idx]
                     key = f"chk_{g['id']}_{s['id']}"
                     with cc[ci]:
-                        # 💡 정보 카드 먼저 렌더링 후 그 하단에 체크박스 배치하여 간섭 제거
                         render_subject_card(s)
                         val = st.checkbox(f"{s['name']} 담기", value=(s["id"] in selected), key=key)
                         if val: selected.add(s["id"])
@@ -443,7 +443,7 @@ def page_career():
             st.markdown(f"- {'✅' if offered else '⚠️'} **{n}** {'(본교 개설)' if offered else '(개별 보완 필요)'}")
     render_made_by()
 
-# ----------------- 14. 페이지: 결과 출력 보고서 (화면에 상시 노출) -----------------
+# ----------------- 14. 페이지: 결과 출력 보고서 -----------------
 def page_print():
     st.markdown("## 🖨️ 최종 결과 내역 및 보관")
     st.caption("시뮬레이터에서 선택한 결과가 아래에 실시간으로 표시됩니다. 내용을 확인하고 파일로 다운로드하세요.")
