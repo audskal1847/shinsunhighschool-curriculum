@@ -36,7 +36,6 @@ def inject_styles():
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 배경 위에서 텍스트와 체크박스가 완벽하게 보이도록 불투명 화이트 스타일 적용 */
     .subject-card {{ 
         background: #ffffff !important; 
         border: 2px solid #6366f1 !important; 
@@ -49,36 +48,6 @@ def inject_styles():
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
     .stCheckbox label {{ font-weight: 800 !important; font-size: 16px !important; color: #000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
-    
-    /* ------------------------------------------------------------- */
-    /* 💡 버튼 디자인 통합 및 2026학년도 버튼만 파란색 변환 (글씨체 기준 인식) */
-    .stButton > button {{
-        font-size: 24px !important; 
-        font-weight: 900 !important; 
-        height: 80px !important; 
-        border-radius: 12px !important; 
-        color: white !important; 
-        border: none !important;
-    }}
-    
-    /* 🔴 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
-    .stButton > button[kind="primary"] {{
-        background-color: #ff4b4b !important;
-    }}
-    .stButton > button[kind="primary"]:hover {{
-        background-color: #ff2b2b !important;
-    }}
-
-    /* 🔵 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
-    div.stButton:has(button p:contains("2026학년도")) > button,
-    div.stButton:has(button:contains("2026학년도")) > button {{
-        background-color: #1e40af !important;
-    }}
-    div.stButton:has(button p:contains("2026학년도")) > button:hover,
-    div.stButton:has(button:contains("2026학년도")) > button:hover {{
-        background-color: #1d4ed8 !important;
-    }}
-    /* ------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -103,6 +72,19 @@ def load_teacher_comments():
 # ----------------- 4. 글로벌 디자인 및 컴포넌트 CSS -----------------
 st.markdown("""
 <style>
+/* 🔴 2025학년도 버튼 (Primary 속성) 강제 빨간색 유지 */
+.stButton > button[kind="primary"] { 
+    font-size: 24px !important; 
+    font-weight: 900 !important; 
+    height: 80px !important; 
+    border-radius: 12px !important; 
+    color: white !important; 
+    background-color: #ff4b4b !important; 
+    border: none !important; 
+}
+.stButton > button[kind="primary"]:hover { background-color: #ff2b2b !important; }
+
+/* 기본 카드 및 뱃지 스타일 */
 .big-card { background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%; }
 .big-card h2 { background: linear-gradient(90deg, #4f46e5, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 56px; margin: 0; font-weight: 800; }
 .big-card p { color: #4b5563; margin: 8px 0 0 0; font-weight: 600; }
@@ -156,8 +138,26 @@ career = load_career()
 comments = load_teacher_comments()
 SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1학기", "2-2":"2학년 2학기", "3-1":"3학년 1학기", "3-2":"3학년 2학기", "3-annual": "3학년 (연간)"}
 
-# ----------------- 8. 페이지: 랜딩 -----------------
+# ----------------- 8. 페이지: 랜딩 (버튼 색상 완벽 분리 로직) -----------------
 def page_landing():
+    # 💡 [필승 해결책] 오직 '첫 화면'에서만 보조(Secondary) 버튼을 크고 파란색으로 만듭니다!
+    st.markdown("""
+    <style>
+    .stButton > button[kind="secondary"] {
+        background-color: #1e40af !important;
+        color: white !important;
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        height: 80px !important;
+        border-radius: 12px !important;
+        border: none !important;
+    }
+    .stButton > button[kind="secondary"]:hover {
+        background-color: #1d4ed8 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("<div style='height: 20vh;'></div>", unsafe_allow_html=True)
     c_l, c_r = st.columns([1, 1], gap="large")
     with c_l:
@@ -168,10 +168,12 @@ def page_landing():
             st.markdown("<h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2>", unsafe_allow_html=True)
     with c_r:
         st.markdown("<p style='color: #1f2937; font-size: 24px; font-weight: 900; margin-bottom: 20px;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
+        # 🔴 2025학년도 버튼 -> type="primary" (빨간색)
         if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2025; st.session_state.year_selected = True; st.rerun()
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="primary"):
+        # 🔵 2026학년도 버튼 -> type="secondary" (파란색)
+        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="secondary"):
             st.session_state.entry_year = 2026; st.session_state.year_selected = True; st.rerun()
     st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
     render_made_by()
@@ -279,7 +281,6 @@ def render_subject_card(s, sem_credit=None):
     
     st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}", unsafe_allow_html=True)
     
-    # 과학과목 상세 정보 펼침 기능 안전 주입
     if "description" in s:
         with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
             st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
