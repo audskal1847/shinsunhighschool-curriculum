@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st
 import json, os
 from pathlib import Path
 from collections import defaultdict
@@ -47,25 +47,24 @@ def inject_styles():
     }}
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
-    .stCheckbox label {{ font-weight: 800 !important; font-size: 16px !important; color: #000 !important; }}
+    .stCheckbox label {{ font-weight: 900 !important; font-size: 18px !important; color: #000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* ------------------------------------------------------------- */
-    /* 💡 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
+    /* 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
     .stButton > button {{
         font-size: 24px !important; 
         font-weight: 900 !important; 
         height: 80px !important; 
         border-radius: 12px !important; 
-        color: #ffffff !important; /* 글자색 흰색 */
+        color: #ffffff !important; 
         border: none !important;
     }}
     .stButton > button p {{
-        color: #ffffff !important; /* 버튼 안 내부 문단 글자색도 흰색 */
+        color: #ffffff !important; 
         font-weight: 900 !important;
     }}
     
-    /* 🔴 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
+    /* 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
     .stButton > button[kind="primary"] {{
         background-color: #ff4b4b !important;
     }}
@@ -73,7 +72,7 @@ def inject_styles():
         background-color: #ff2b2b !important;
     }}
 
-    /* 🔵 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
+    /* 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
     div.stButton:has(button p:contains("2026학년도")) > button,
     div.stButton:has(button:contains("2026학년도")) > button {{
         background-color: #1e40af !important;
@@ -82,7 +81,6 @@ def inject_styles():
     div.stButton:has(button:contains("2026학년도")) > button:hover {{
         background-color: #1d4ed8 !important;
     }}
-    /* ------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -162,12 +160,11 @@ SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1
 
 # ----------------- 8. 페이지: 랜딩 -----------------
 def page_landing():
-    # 랜딩페이지전용 파란색 버튼 보완 패치 적용
     st.markdown("""
     <style>
     .stButton > button[kind="secondary"] {
         background-color: #1e40af !important;
-        color: #ffffff !important; /* 확실한 흰색 글자 고정 */
+        color: #ffffff !important; 
         font-size: 24px !important;
         font-weight: 900 !important;
         height: 80px !important;
@@ -293,7 +290,7 @@ def show_semester_subjects(sem_key):
             with st.expander(f"🔵 학생선택 묶음 {gid}{pick_label} · {len(items)}과목 중 선택", expanded=False):
                 for s, c in items: render_subject_card(s, c)
 
-def render_subject_card(s, sem_credit=None):
+def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=None, checkbox_key=None):
     credit = sem_credit if sem_credit else s.get("op_credit") or 0
     typ = s.get("type","")
     b_map = {"공통": "badge-type-공통", "일반": "badge-type-일반", "진로": "badge-type-진로", "융합": "badge-type-융합"}
@@ -303,8 +300,21 @@ def render_subject_card(s, sem_credit=None):
     tc = comments.get(yrk, {}).get(s["name"], None)
     tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
     
-    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}", unsafe_allow_html=True)
+    # 상단 배지 및 학점 라인을 하나의 투명 패널로 묶어 디자인
+    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div>", unsafe_allow_html=True)
     
+    # 💡 [구조 혁신] 시뮬레이터 모드일 경우 중복 과목명과 별도 체크박스를 없애고, 학점 바로 밑에 과목명으로 된 체크박스를 주입
+    if simulator_mode and selected_set is not None and checkbox_key is not None:
+        val = st.checkbox(s["name"], value=(s["id"] in selected_set), key=checkbox_key)
+        if val: selected_set.add(s["id"])
+        else: selected_set.discard(s["id"])
+    else:
+        # 기존 보기 및 탐색 모드에서는 일반 과목 텍스트 출력
+        st.markdown(f"<div style='font-size:16px; font-weight:600; margin-top:4px; color:#000;'>{s['name']}</div>", unsafe_allow_html=True)
+        
+    if tc_html:
+        st.markdown(tc_html, unsafe_allow_html=True)
+        
     if "description" in s:
         with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
             st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
@@ -376,10 +386,8 @@ def render_group_picker(g, selected):
                     s = subs[idx]
                     key = f"chk_{g['id']}_{s['id']}"
                     with cc[ci]:
-                        render_subject_card(s)
-                        val = st.checkbox(f"{s['name']} 담기", value=(s["id"] in selected), key=key)
-                        if val: selected.add(s["id"])
-                        else: selected.discard(s["id"])
+                        # 💡 기존의 외부 st.checkbox를 지우고 카드 구조 안으로 바인딩 처리 전달
+                        render_subject_card(s, simulator_mode=True, selected_set=selected, checkbox_key=key)
             
             in_sel = [s for s in subs if s["id"] in selected]
             if len(in_sel) == pinfo["pick"]: st.success(f"✅ 조건 충족 완료 ({len(in_sel)}/{pinfo['pick']})")
