@@ -241,10 +241,18 @@ def render_subject_card(s, sem_credit=None):
     b_map = {"공통": "badge-type-공통", "일반": "badge-type-일반", "진로": "badge-type-진로", "융합": "badge-type-융합"}
     b_cls = b_map.get(typ, "badge-area")
     req_badge = "<span class='badge badge-req'>필수</span>" if s["section"]=="학교지정" else "<span class='badge badge-sel'>선택</span>"
-    yrk = str(curriculum["entry_year"])
-    tc = comments.get(yrk, {}).get(s["name"], None)
-    tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
-    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}</div>", unsafe_allow_html=True)
+    
+    # 💡 [핵심] 카드 기본 표시
+    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between;'><div><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><b>{credit}학점</b></div><div style='font-size:18px; font-weight:900; margin-top:5px;'>{s['name']}</div>", unsafe_allow_html=True)
+    
+    # 💡 [핵심] 상세 정보 표시 (JSON에 description이 있을 때만 작동)
+    if "description" in s:
+        with st.expander("📖 과목 상세 정보 보기"):
+            st.markdown(f"**핵심 아이디어:** {s['description']['core_idea']}")
+            st.markdown("**내용 요소:**")
+            for el in s['description']['content_elements']:
+                st.markdown(f"- {el}")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ----------------- 12. 페이지: 시뮬레이터 -----------------
 def page_simulator():
