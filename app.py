@@ -36,18 +36,20 @@ def inject_styles():
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 배경 위에서 텍스트와 체크박스가 완벽하게 보이도록 불투명 화이트 스타일 적용 */
-    .subject-card {{ 
+    /* 💡 순정 테두리 박스와 정적 카드를 동시에 제어하여 완벽한 화이트 인디고 카드 구현 */
+    .subject-card, div[data-testid="stVerticalBlockBorderWrapper"] {{ 
         background: #ffffff !important; 
         border: 2px solid #6366f1 !important; 
-        border-radius: 12px; 
-        padding: 20px; 
-        margin-bottom: 15px; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        border-radius: 12px !important; 
+        padding: 20px !important; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; 
+        margin-bottom: 10px !important;
     }}
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
-    .stCheckbox label {{ font-weight: 900 !important; font-size: 18px !important; color: #000 !important; }}
+    
+    /* 체크박스 레이블 자체를 과목명으로 쓰기 때문에 가독성을 극대화합니다 */
+    .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
     /* 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
@@ -64,7 +66,7 @@ def inject_styles():
         font-weight: 900 !important;
     }}
     
-    /* 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
+    /* 🔴 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
     .stButton > button[kind="primary"] {{
         background-color: #ff4b4b !important;
     }}
@@ -72,7 +74,7 @@ def inject_styles():
         background-color: #ff2b2b !important;
     }}
 
-    /* 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
+    /* 🔵 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
     div.stButton:has(button p:contains("2026학년도")) > button,
     div.stButton:has(button:contains("2026학년도")) > button {{
         background-color: #1e40af !important;
@@ -290,6 +292,7 @@ def show_semester_subjects(sem_key):
             with st.expander(f"🔵 학생선택 묶음 {gid}{pick_label} · {len(items)}과목 중 선택", expanded=False):
                 for s, c in items: render_subject_card(s, c)
 
+# ----------------- 💡 핵심 함수: 완벽 기입 카드 렌더러 -----------------
 def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=None, checkbox_key=None):
     credit = sem_credit if sem_credit else s.get("op_credit") or 0
     typ = s.get("type","")
@@ -300,29 +303,38 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
     tc = comments.get(yrk, {}).get(s["name"], None)
     tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
     
-    # 상단 배지 및 학점 라인을 하나의 투명 패널로 묶어 디자인
-    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div>", unsafe_allow_html=True)
-    
-    # 💡 [구조 혁신] 시뮬레이터 모드일 경우 중복 과목명과 별도 체크박스를 없애고, 학점 바로 밑에 과목명으로 된 체크박스를 주입
-    if simulator_mode and selected_set is not None and checkbox_key is not None:
-        val = st.checkbox(s["name"], value=(s["id"] in selected_set), key=checkbox_key)
-        if val: selected_set.add(s["id"])
-        else: selected_set.discard(s["id"])
-    else:
-        # 기존 보기 및 탐색 모드에서는 일반 과목 텍스트 출력
-        st.markdown(f"<div style='font-size:16px; font-weight:600; margin-top:4px; color:#000;'>{s['name']}</div>", unsafe_allow_html=True)
+    # 💡 순정 border 컨테이너를 사용하여 내부에 선언된 위젯들이 한 울타리 안에 갇히도록 원천 교정합니다.
+    with st.container(border=True):
+        st.markdown(f"""
+        <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;'>
+            <div>
+                <span class='badge badge-area'>{s['area']}</span>
+                <span class='badge {b_cls}'>{typ}</span>
+                {req_badge}
+            </div>
+            <div style='color:#4f46e5; font-weight:700;'>{credit}학점</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-    if tc_html:
-        st.markdown(tc_html, unsafe_allow_html=True)
-        
-    if "description" in s:
-        with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
-            st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
-            st.markdown("**📋 단원 핵심 내용 요소**", unsafe_allow_html=True)
-            for element in s['description']['content_elements']:
-                st.markdown(f"- {element}")
-                
-    st.markdown("</div>", unsafe_allow_html=True)
+        # 시뮬레이터 설계 모드 시, 과목명을 레이블로 품은 체크박스를 카드 내부 정중앙에 고정 배치합니다.
+        if simulator_mode and selected_set is not None and checkbox_key is not None:
+            val = st.checkbox(s["name"], value=(s["id"] in selected_set), key=checkbox_key)
+            if val: selected_set.add(s["id"])
+            else: selected_set.discard(s["id"])
+        else:
+            # 일반 탐색 페이지인 경우 과목명 텍스트 노출
+            st.markdown(f"<div style='font-size:18px; font-weight:700; margin-top:4px; color:#000; margin-bottom:8px;'>{s['name']}</div>", unsafe_allow_html=True)
+            
+        if tc_html:
+            st.markdown(tc_html, unsafe_allow_html=True)
+            
+        # 과학과목 상세 정보 펼침 상자도 완벽하게 상자 테두리 안쪽 하단에 누락 없이 수용됩니다.
+        if "description" in s:
+            with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
+                st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
+                st.markdown("**📋 단원 핵심 내용 요소**", unsafe_allow_html=True)
+                for element in s['description']['content_elements']:
+                    st.markdown(f"- {element}")
 
 # ----------------- 12. 페이지: 시뮬레이터 -----------------
 def page_simulator():
@@ -386,7 +398,6 @@ def render_group_picker(g, selected):
                     s = subs[idx]
                     key = f"chk_{g['id']}_{s['id']}"
                     with cc[ci]:
-                        # 💡 기존의 외부 st.checkbox를 지우고 카드 구조 안으로 바인딩 처리 전달
                         render_subject_card(s, simulator_mode=True, selected_set=selected, checkbox_key=key)
             
             in_sel = [s for s in subs if s["id"] in selected]
