@@ -50,17 +50,18 @@ def inject_styles():
     .stCheckbox label {{ font-weight: 800 !important; font-size: 16px !important; color: #000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
+    /* ------------------------------------------------------------- */
     /* 💡 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
     .stButton > button {{
         font-size: 24px !important; 
         font-weight: 900 !important; 
         height: 80px !important; 
         border-radius: 12px !important; 
-        color: #ffffff !important; 
+        color: #ffffff !important; /* 글자색 흰색 */
         border: none !important;
     }}
     .stButton > button p {{
-        color: #ffffff !important; 
+        color: #ffffff !important; /* 버튼 안 내부 문단 글자색도 흰색 */
         font-weight: 900 !important;
     }}
     
@@ -81,6 +82,7 @@ def inject_styles():
     div.stButton:has(button:contains("2026학년도")) > button:hover {{
         background-color: #1d4ed8 !important;
     }}
+    /* ------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -160,11 +162,12 @@ SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1
 
 # ----------------- 8. 페이지: 랜딩 -----------------
 def page_landing():
+    # 랜딩페이지전용 파란색 버튼 보완 패치 적용
     st.markdown("""
     <style>
     .stButton > button[kind="secondary"] {
         background-color: #1e40af !important;
-        color: #ffffff !important; 
+        color: #ffffff !important; /* 확실한 흰색 글자 고정 */
         font-size: 24px !important;
         font-weight: 900 !important;
         height: 80px !important;
@@ -302,11 +305,10 @@ def render_subject_card(s, sem_credit=None):
     
     st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}", unsafe_allow_html=True)
     
-    # 💡 [상세정보 구조 렌더링] JSON에 description 필드가 포함된 과학 과목들은 expander를 카드 내부에 깔끔히 생성합니다.
     if "description" in s:
         with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
             st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
-            st.markdown("**📋 핵심 내용 요소**", unsafe_allow_html=True)
+            st.markdown("**📋 단원 핵심 내용 요소**", unsafe_allow_html=True)
             for element in s['description']['content_elements']:
                 st.markdown(f"- {element}")
                 
