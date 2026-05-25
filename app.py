@@ -27,6 +27,7 @@ def inject_styles():
     bg_css = ""
     if img_path.exists():
         img_b64 = get_base64_of_bin_file(str(img_path))
+        # 💡 파이썬 f-string 오류 방지를 위해 모든 중괄호를 {{ }}로 이중 처리했습니다.
         bg_css = f'''
         .stApp {{
             background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
@@ -36,8 +37,47 @@ def inject_styles():
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 기본 UI 스타일 정의 */
-    .subject-card {{ background: #ffffff !important; border: 2px solid #6366f1 !important; border-radius: 12px; padding
+    /* 💡 배경 위에서 텍스트와 체크박스가 완벽하게 보이도록 불투명 화이트 스타일 적용 */
+    .subject-card {{ 
+        background: #ffffff !important; 
+        border: 2px solid #6366f1 !important; 
+        border-radius: 12px; 
+        padding: 20px; 
+        margin-bottom: 15px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    }}
+    .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
+    h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
+    .stCheckbox label {{ font-weight: 800 !important; font-size: 16px !important; color: #000 !important; }}
+    .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
+    
+    /* 🔴 [첫 번째 버튼] 2025학년도 입학생 - 빨간색 유지 */
+    .stButton:nth-of-type(1) > button {{
+        background-color: #ff4b4b !important;
+        color: white !important;
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        height: 80px !important;
+        border-radius: 12px !important;
+        border: none !important;
+    }}
+    .stButton:nth-of-type(1) > button:hover {{ background-color: #ff3333 !important; }}
+
+    /* 🔵 [두 번째 버튼] 2026학년도 입학생 - 파란색으로 변경 */
+    .stButton:nth-of-type(2) > button {{
+        background-color: #1e40af !important;
+        color: white !important;
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        height: 80px !important;
+        border-radius: 12px !important;
+        border: none !important;
+    }}
+    .stButton:nth-of-type(2) > button:hover {{ background-color: #1d4ed8 !important; }}
+    </style>
+    """, unsafe_allow_html=True)
+
+inject_styles()
 
 # ----------------- 3. 공용 데이터 로더 -----------------
 def load_curriculum(year: int):
@@ -58,21 +98,10 @@ def load_teacher_comments():
 # ----------------- 4. 글로벌 디자인 및 컴포넌트 CSS -----------------
 st.markdown("""
 <style>
-.stButton > button[kind="primary"] { 
-    font-size: 24px !important; 
-    font-weight: 900 !important; 
-    height: 80px !important; 
-    border-radius: 12px !important; 
-    color: white !important; 
-    background-color: #ff4b4b !important; 
-    border: none !important; 
-}
-.stButton > button[kind="primary"]:hover { background-color: #ff2b2b !important; }
 .big-card { background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%; }
 .big-card h2 { background: linear-gradient(90deg, #4f46e5, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 56px; margin: 0; font-weight: 800; }
 .big-card p { color: #4b5563; margin: 8px 0 0 0; font-weight: 600; }
 .big-card .sub { color: #6b7280; font-size: 13px; margin-top: 4px; }
-.subject-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
 .badge { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-right: 4px; }
 .badge-area { background: #f3f4f6; color: #374151; }
 .badge-type-공통 { background: #dbeafe; color: #1e40af; }
@@ -122,7 +151,7 @@ career = load_career()
 comments = load_teacher_comments()
 SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1학기", "2-2":"2학년 2학기", "3-1":"3학년 1학기", "3-2":"3학년 2학기", "3-annual": "3학년 (연간)"}
 
-# ----------------- 8. 페이지: 랜딩 -----------------
+# ----------------- 8. 페이지: 랜딩 (좌우 정렬 균형 완벽화) -----------------
 def page_landing():
     st.markdown("<div style='height: 20vh;'></div>", unsafe_allow_html=True)
     c_l, c_r = st.columns([1, 1], gap="large")
@@ -134,10 +163,10 @@ def page_landing():
             st.markdown("<h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2>", unsafe_allow_html=True)
     with c_r:
         st.markdown("<p style='color: #1f2937; font-size: 24px; font-weight: 900; margin-bottom: 20px;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
-        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True, type="primary"):
+        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True):
             st.session_state.entry_year = 2025; st.session_state.year_selected = True; st.rerun()
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="primary"):
+        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True):
             st.session_state.entry_year = 2026; st.session_state.year_selected = True; st.rerun()
     st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
     render_made_by()
@@ -242,7 +271,19 @@ def render_subject_card(s, sem_credit=None):
     yrk = str(curriculum["entry_year"])
     tc = comments.get(yrk, {}).get(s["name"], None)
     tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
-    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}</div>", unsafe_allow_html=True)
+    
+    # 카드 디자인 시작
+    st.markdown(f"<div class='subject-card'><div style='display:flex; justify-content:space-between; align-items:center'><div><span class='badge badge-area'>{s['area']}</span><span class='badge {b_cls}'>{typ}</span>{req_badge}</div><div style='color:#4f46e5; font-weight:700'>{credit}학점</div></div><div style='font-size:16px; font-weight:600; margin-top:8px'>{s['name']}</div>{tc_html}", unsafe_allow_html=True)
+    
+    # 💡 [과학과목 상세정보 구조 적용] JSON에 description 필드가 포함된 과목은 expander를 카드 내부에 표시합니다.
+    if "description" in s:
+        with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
+            st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
+            st.markdown("**📋 단원 핵심 내용 요소**", unsafe_allow_html=True)
+            for element in s['description']['content_elements']:
+                st.markdown(f"- {element}")
+                
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ----------------- 12. 페이지: 시뮬레이터 -----------------
 def page_simulator():
@@ -279,7 +320,6 @@ def render_group_picker(g, selected):
     sem_labels = ", ".join(SEM_LABELS.get(p["sem"], p["sem"]) + f" 택{p['pick']}" for p in g["pick_per_sem"])
     st.markdown(f"**[{g['id']}] {sem_labels}** (연간 총 {g.get('total_credit','-')}학점 이수)")
 
-    # 💡 [핵심 수정] 단일 선택(택1)과 다중 선택(택2 이상)을 분기 처리하여 완벽 복원
     for pinfo in g["pick_per_sem"]:
         sem = pinfo["sem"]
         label = "3학년 제2외국어 연간 선택과목" if sem == "3-annual" else SEM_LABELS.get(sem, sem)
@@ -297,7 +337,7 @@ def render_group_picker(g, selected):
                 for s in subs:
                     if s["name"] == choice: selected.add(s["id"])
                     
-        # 택 2과목 이상일 경우 -> 체크박스 (Checkbox) 복원
+        # 택 2과목 이상일 경우 -> 체크박스 다중 선택 안정성 확보
         else:
             st.caption(f"※ 하단 목록 중 조건에 맞춰 **정확히 {pinfo['pick']}개 과목**을 체크하세요.")
             n_cols = 3
@@ -310,7 +350,9 @@ def render_group_picker(g, selected):
                     s = subs[idx]
                     key = f"chk_{g['id']}_{s['id']}"
                     with cc[ci]:
-                        val = st.checkbox(f"{s['name']} ({s.get('op_credit')}학점)", value=(s["id"] in selected), key=key)
+                        # 💡 정보 카드 먼저 렌더링 후 그 하단에 체크박스 배치하여 간섭 제거
+                        render_subject_card(s)
+                        val = st.checkbox(f"{s['name']} 담기", value=(s["id"] in selected), key=key)
                         if val: selected.add(s["id"])
                         else: selected.discard(s["id"])
             
@@ -401,7 +443,7 @@ def page_career():
             st.markdown(f"- {'✅' if offered else '⚠️'} **{n}** {'(본교 개설)' if offered else '(개별 보완 필요)'}")
     render_made_by()
 
-# ----------------- 14. 페이지: 결과 출력 보고서 (💡 화면에 상시 노출로 변경됨) -----------------
+# ----------------- 14. 페이지: 결과 출력 보고서 (화면에 상시 노출) -----------------
 def page_print():
     st.markdown("## 🖨️ 최종 결과 내역 및 보관")
     st.caption("시뮬레이터에서 선택한 결과가 아래에 실시간으로 표시됩니다. 내용을 확인하고 파일로 다운로드하세요.")
@@ -411,13 +453,11 @@ def page_print():
     auto = {s["id"] for s in curriculum["subjects"] if s["section"]=="학교지정" and s["group_id"] is None}
     final = picked | auto
 
-    # 정보 입력란 (입력 즉시 실시간으로 HTML에 반영됨)
     c1, c2, c3 = st.columns(3)
     with c1: name = st.text_input("학생 성명 (선택사항)", "")
     with c2: sclass = st.text_input("학번 고유 정보 (선택사항)", "")
     with c3: counselor = st.text_input("상담 확인 교사 (선택사항)", "")
 
-    # 💡 [핵심 수정] 버튼을 없애고 변수에 HTML 생성값을 즉시 할당하여 화면에 항상 노출되도록 함
     html = build_report_html(name, sclass, counselor, final)
     
     st.markdown("---")
@@ -438,9 +478,7 @@ def page_print():
     st.info("💡 **가장 깔끔한 PDF 보관 팁:** 하단 미리보기 창 영역 내부 혹은 HTML 다운로드 파일을 연 후 브라우저 단축키 **인쇄(Ctrl + P)** 명령을 실행한 뒤, 프린터 대상을 **'PDF로 저장'** 파일 형태로 저장하시면 깨짐 없는 서식 본문 그대로 영구 저장이 가능합니다.")
     
     st.markdown("### 📄 내 선택 결과 미리보기")
-    # 💡 버튼 클릭 없이 바로 HTML 렌더링
     st.components.v1.html(html, height=800, scrolling=True)
-    
     render_made_by()
 
 def build_report_html(name, sclass, counselor, final_ids):
