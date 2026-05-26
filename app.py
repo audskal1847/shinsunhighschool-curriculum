@@ -26,7 +26,7 @@ def inject_styles():
     img_path = ASSETS_DIR / "school_image.png"
     bg_css = ""
     
-    # 💡 [안전장치] 폴더나 사진 파일이 없어도 에러가 나지 않도록 예외 처리
+    # [안전장치] 폴더나 사진 파일이 없어도 에러가 나지 않도록 예외 처리
     try:
         if img_path.exists():
             img_b64 = get_base64_of_bin_file(str(img_path))
@@ -55,6 +55,14 @@ def inject_styles():
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
     
+    /* 🔴 [원인 차단] 진로 안내 문구 전용 클래스 - 검은색 강제 규칙을 완벽하게 이겨냅니다 */
+    .main-red-notice, .main-red-notice *, div.main-red-notice, p.main-red-notice, span.main-red-notice {{
+        color: #ff0000 !important;
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        display: block !important;
+    }}
+    
     /* 체크박스 레이블 자체를 과목명으로 쓰기 때문에 가독성을 극대화합니다 */
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
@@ -73,7 +81,7 @@ def inject_styles():
         font-weight: 900 !important;
     }}
     
-    /* 🔴 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
+    /* 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
     .stButton > button[kind="primary"] {{
         background-color: #ff4b4b !important;
     }}
@@ -81,7 +89,7 @@ def inject_styles():
         background-color: #ff2b2b !important;
     }}
 
-    /* 🔵 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
+    /* 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
     div.stButton:has(button p:contains("2026학년도")) > button,
     div.stButton:has(button:contains("2026학년도")) > button {{
         background-color: #1e40af !important;
@@ -163,7 +171,7 @@ with st.sidebar:
         page = None
         year = st.session_state.get("entry_year", 2025)
 
-    # 💡 사이드바 하단 PDF 안내서 다운로드 버튼 추가
+    # 사이드바 하단 PDF 안내서 다운로드 버튼
     st.markdown("---")
     st.markdown("### 📥 자료 다운로드")
     pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
@@ -343,7 +351,7 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
             if val: selected_set.add(s["id"])
             else: selected_set.discard(s["id"])
         else:
-            st.markdown(f"<div style='font-size:18px; font-weight:700; margin-top:4px; color:#000; margin-bottom:8px;'>{s['name']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size:18px; font-weight:700; mt:4px; color:#000; mb:8px;'>{s['name']}</div>", unsafe_allow_html=True)
             
         if tc_html:
             st.markdown(tc_html, unsafe_allow_html=True)
@@ -355,7 +363,7 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
                 for element in s['description']['content_elements']:
                     st.markdown(f"- {element}")
 
-# ----------------- 12. 페이지: 시뮬레이터 -----------------
+# ----------------- 12. 페이지: 시간표 시뮬레이터 -----------------
 def page_simulator():
     st.markdown("## 📅 시간표 시뮬레이터")
     st.caption("학교지정 과목은 고정 처리됩니다. 학생선택군 카드 내부의 과목 수를 정확히 맞추어 설계해 주세요.")
@@ -486,8 +494,8 @@ def page_career():
     st.markdown("## 🎓 2028 대입 전공 연계 권장 교과 안내")
     if not career: st.info("진로 계열 데이터가 없습니다."); return
     
-    # 💡 [핵심 수정] 어떤 디자인 규칙이 있더라도 무조건 빨간색으로 이기도록 강력한 스타일(span 속성) 적용
-    st.markdown("<span style='color: #ff0000 !important; font-size: 22px !important; font-weight: 900 !important; display: block; margin-bottom: 10px;'>🔴 본인의 진로 지향 계열을 선택해 주세요.</span>", unsafe_allow_html=True)
+    # 💡 [핵심 교정] 새롭게 부여된 클래스 이름으로 검은색 고정 장벽을 이기고 강제로 빨간색을 출력시킵니다.
+    st.markdown("<div class='main-red-notice'>🔴 본인의 진로 지향 계열을 선택해 주세요.</div>", unsafe_allow_html=True)
     track = st.selectbox("계열 선택", list(career.keys()), label_visibility="collapsed")
     info = career[track]
 
