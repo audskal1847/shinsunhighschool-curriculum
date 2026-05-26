@@ -36,7 +36,7 @@ def inject_styles():
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 💡 순정 테두리 박스와 정적 카드를 동시에 제어하여 완벽한 화이트 인디고 카드 구현 */
+    /* 순정 테두리 박스와 정적 카드를 동시에 제어하여 완벽한 화이트 인디고 카드 구현 */
     .subject-card, div[data-testid="stVerticalBlockBorderWrapper"] {{ 
         background: #ffffff !important; 
         border: 2px solid #6366f1 !important; 
@@ -141,10 +141,11 @@ def render_made_by():
         </div>
     """, unsafe_allow_html=True)
 
-# ----------------- 7. 네비게이션 및 사이드바 -----------------
+# ----------------- 7. 네비게이션 및 사이드바 (PDF 다운로드 추가) -----------------
 with st.sidebar:
     st.markdown("<p style='font-size: 20px; color: #555555; font-weight: bold;'>⭐주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", unsafe_allow_html=True)
     st.markdown("---")
+    
     if st.session_state.get("year_selected", False):
         year = st.radio("입학년도 선택", [2025, 2026], format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y==2025 else '현재 1학년'})", index=0 if st.session_state.entry_year != 2026 else 1)
         st.session_state.entry_year = year
@@ -154,6 +155,22 @@ with st.sidebar:
         st.info("👉 입학년도를 먼저 선택하세요.")
         page = None
         year = st.session_state.get("entry_year", 2025)
+
+    # 💡 사이드바 하단 PDF 안내서 다운로드 버튼 추가
+    st.markdown("---")
+    st.markdown("### 📥 자료 다운로드")
+    pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
+    if pdf_path.exists():
+        with open(pdf_path, "rb") as pdf_file:
+            st.download_button(
+                label="📄 선택과목 안내서 다운로드",
+                data=pdf_file,
+                file_name="2026_선택과목_안내서.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+    else:
+        st.caption("※ 'assets' 폴더에 '2026.subjectguidebook.pdf' 파일을 넣으면 다운로드 버튼이 활성화됩니다.")
 
 curriculum = load_curriculum(year)
 career = load_career()
@@ -292,7 +309,6 @@ def show_semester_subjects(sem_key):
             with st.expander(f"🔵 학생선택 묶음 {gid}{pick_label} · {len(items)}과목 중 선택", expanded=False):
                 for s, c in items: render_subject_card(s, c)
 
-# ----------------- 💡 핵심 함수: 완벽 기입 카드 렌더러 -----------------
 def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=None, checkbox_key=None):
     credit = sem_credit if sem_credit else s.get("op_credit") or 0
     typ = s.get("type","")
@@ -303,7 +319,6 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
     tc = comments.get(yrk, {}).get(s["name"], None)
     tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
     
-    # 💡 순정 border 컨테이너를 사용하여 내부에 선언된 위젯들이 한 울타리 안에 갇히도록 원천 교정합니다.
     with st.container(border=True):
         st.markdown(f"""
         <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;'>
@@ -316,19 +331,16 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
         </div>
         """, unsafe_allow_html=True)
         
-        # 시뮬레이터 설계 모드 시, 과목명을 레이블로 품은 체크박스를 카드 내부 정중앙에 고정 배치합니다.
         if simulator_mode and selected_set is not None and checkbox_key is not None:
             val = st.checkbox(s["name"], value=(s["id"] in selected_set), key=checkbox_key)
             if val: selected_set.add(s["id"])
             else: selected_set.discard(s["id"])
         else:
-            # 일반 탐색 페이지인 경우 과목명 텍스트 노출
             st.markdown(f"<div style='font-size:18px; font-weight:700; margin-top:4px; color:#000; margin-bottom:8px;'>{s['name']}</div>", unsafe_allow_html=True)
             
         if tc_html:
             st.markdown(tc_html, unsafe_allow_html=True)
             
-        # 과학과목 상세 정보 펼침 상자도 완벽하게 상자 테두리 안쪽 하단에 누락 없이 수용됩니다.
         if "description" in s:
             with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
                 st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
@@ -467,7 +479,9 @@ def page_career():
     st.markdown("## 🎓 2028 대입 전공 연계 권장 교과 안내")
     if not career: st.info("진로 계열 데이터가 없습니다."); return
     
-    track = st.selectbox("본인의 진로 지향 계열을 선택해 주세요", list(career.keys()))
+    # 💡 [핵심 수정] 빨간색 안내 문구 추가 및 기존 셀렉트박스 레이블 숨김 처리
+    st.markdown("<p style='color: #ff0000; font-size: 20px; font-weight: 900; margin-bottom: 5px;'>🔴 본인의 진로 지향 계열을 선택해 주세요.</p>", unsafe_allow_html=True)
+    track = st.selectbox("계열 선택", list(career.keys()), label_visibility="collapsed")
     info = career[track]
 
     st.markdown(f"### 🎯 계열 가이드: {track}")
