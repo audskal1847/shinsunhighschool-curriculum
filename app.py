@@ -32,8 +32,9 @@ def inject_styles():
             img_b64 = get_base64_of_bin_file(str(img_path))
             bg_css = f'''
             .stApp {{
-                background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
-                background-size: cover; background-attachment: fixed;
+                background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}") !important;
+                background-size: cover !important; 
+                background-attachment: fixed !important;
             }}
             '''
     except Exception:
@@ -55,7 +56,7 @@ def inject_styles():
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
     
-    /* 🔴 [원인 차단] 진로 안내 문구 전용 클래스 - 검은색 강제 규칙을 완벽하게 이겨냅니다 */
+    /* 🔴 진로 안내 문구 전용 클래스 */
     .main-red-notice, .main-red-notice *, div.main-red-notice, p.main-red-notice, span.main-red-notice {{
         color: #ff0000 !important;
         font-size: 22px !important;
@@ -67,7 +68,7 @@ def inject_styles():
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
+    /* 대형 메인 버튼 디자인 및 글자색 흰색 고정 */
     .stButton > button {{
         font-size: 24px !important; 
         font-weight: 900 !important; 
@@ -98,6 +99,30 @@ def inject_styles():
     div.stButton:has(button:contains("2026학년도")) > button:hover {{
         background-color: #1d4ed8 !important;
     }}
+
+    /* ------------------------------------------------------------- */
+    /* 💡 [완벽 해결] 학년도 변경 버튼 스타일 정상화 (검은색 글자 및 슬림 크기 고정) */
+    div.stButton:has(button p:contains("학년도 변경")) > button,
+    div.stButton:has(button:contains("학년도 변경")) > button {{
+        color: #000000 !important;
+        background-color: #f3f4f6 !important;
+        border: 1px solid #cbd5e1 !important;
+        height: 42px !important;
+        font-size: 15px !important;
+        border-radius: 8px !important;
+    }}
+    div.stButton:has(button p:contains("학년도 변경")) > button p,
+    div.stButton:has(button:contains("학년도 변경")) > button p {{
+        color: #000000 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+    }}
+    div.stButton:has(button p:contains("학년도 변경")) > button:hover,
+    div.stButton:has(button:contains("학년도 변경")) > button:hover {{
+        background-color: #e2e8f0 !important;
+        border-color: #94a3b8 !important;
+    }}
+    /* ------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -351,7 +376,7 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
             if val: selected_set.add(s["id"])
             else: selected_set.discard(s["id"])
         else:
-            st.markdown(f"<div style='font-size:18px; font-weight:700; mt:4px; color:#000; mb:8px;'>{s['name']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size:18px; font-weight:700; margin-top:4px; color:#000; margin-bottom:8px;'>{s['name']}</div>", unsafe_allow_html=True)
             
         if tc_html:
             st.markdown(tc_html, unsafe_allow_html=True)
@@ -494,7 +519,6 @@ def page_career():
     st.markdown("## 🎓 2028 대입 전공 연계 권장 교과 안내")
     if not career: st.info("진로 계열 데이터가 없습니다."); return
     
-    # 💡 [핵심 교정] 새롭게 부여된 클래스 이름으로 검은색 고정 장벽을 이기고 강제로 빨간색을 출력시킵니다.
     st.markdown("<div class='main-red-notice'>🔴 본인의 진로 지향 계열을 선택해 주세요.</div>", unsafe_allow_html=True)
     track = st.selectbox("계열 선택", list(career.keys()), label_visibility="collapsed")
     info = career[track]
