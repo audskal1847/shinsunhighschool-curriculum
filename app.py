@@ -101,24 +101,20 @@ def inject_styles():
     }}
 
     /* ------------------------------------------------------------- */
-    /* 💡 [완벽 해결] 학년도 변경 버튼 스타일 정상화 (검은색 글자 및 슬림 크기 고정) */
-    div.stButton:has(button p:contains("학년도 변경")) > button,
-    div.stButton:has(button:contains("학년도 변경")) > button {{
-        color: #000000 !important;
+    /* 💡 [완벽 해결] 학년도 변경 버튼 강제 래퍼 고정 (100% 작동 방식) */
+    .change-year-btn .stButton > button {{
         background-color: #f3f4f6 !important;
+        color: #000000 !important; /* 글자색을 명확한 검은색으로 고정 */
         border: 1px solid #cbd5e1 !important;
-        height: 42px !important;
-        font-size: 15px !important;
+        height: 45px !important;   /* 버튼 높이를 작고 얇게 수정 */
         border-radius: 8px !important;
     }}
-    div.stButton:has(button p:contains("학년도 변경")) > button p,
-    div.stButton:has(button:contains("학년도 변경")) > button p {{
-        color: #000000 !important;
-        font-size: 15px !important;
-        font-weight: 700 !important;
+    .change-year-btn .stButton > button p {{
+        color: #000000 !important; /* 내부 문단 글자도 완벽한 검은색으로 고정 */
+        font-size: 16px !important;
+        font-weight: 800 !important;
     }}
-    div.stButton:has(button p:contains("학년도 변경")) > button:hover,
-    div.stButton:has(button:contains("학년도 변경")) > button:hover {{
+    .change-year-btn .stButton > button:hover {{
         background-color: #e2e8f0 !important;
         border-color: #94a3b8 !important;
     }}
@@ -262,8 +258,11 @@ def page_landing():
 def page_home():
     col_l, col_r = st.columns([5, 1])
     with col_r:
+        # 💡 [핵심 교정] 특수 래퍼 박스로 감싸서 버튼이 흰색으로 오염되는 것을 완전히 방어합니다.
+        st.markdown('<div class="change-year-btn">', unsafe_allow_html=True)
         if st.button("🔄 학년도 변경", use_container_width=True):
             st.session_state.year_selected = False; st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
     st.caption("성공적인 고교학점제 마무리를 위한 진로 학업 설계 가이드북")
