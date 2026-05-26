@@ -25,18 +25,25 @@ def get_base64_of_bin_file(bin_file):
 def inject_styles():
     img_path = ASSETS_DIR / "school_image.png"
     bg_css = ""
-    if img_path.exists():
-        img_b64 = get_base64_of_bin_file(str(img_path))
-        bg_css = f'''
-        .stApp {{
-            background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
-            background-size: cover; background-attachment: fixed;
-        }}
-        '''
+    
+    # [안전장치] 폴더나 사진 파일이 없어도 에러가 나지 않도록 예외 처리
+    try:
+        if img_path.exists():
+            img_b64 = get_base64_of_bin_file(str(img_path))
+            bg_css = f'''
+            .stApp {{
+                background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}") !important;
+                background-size: cover !important; 
+                background-attachment: fixed !important;
+            }}
+            '''
+    except Exception:
+        pass
+
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 순정 테두리 박스와 정적 카드를 동시에 제어하여 완벽한 화이트 인디고 카드 구현 */
+    /* 카드 디자인 */
     .subject-card, div[data-testid="stVerticalBlockBorderWrapper"] {{ 
         background: #ffffff !important; 
         border: 2px solid #6366f1 !important; 
@@ -45,14 +52,23 @@ def inject_styles():
         box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; 
         margin-bottom: 10px !important;
     }}
+    /* 기본 텍스트 검은색 강제 (가독성 목적) */
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
+    
+    /* 🔴 진로 안내 문구 전용 클래스 */
+    .main-red-notice, .main-red-notice *, div.main-red-notice, p.main-red-notice, span.main-red-notice {{
+        color: #ff0000 !important;
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        display: block !important;
+    }}
     
     /* 체크박스 레이블 자체를 과목명으로 쓰기 때문에 가독성을 극대화합니다 */
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
+    /* 대형 메인 버튼 디자인 및 글자색 흰색 고정 */
     .stButton > button {{
         font-size: 24px !important; 
         font-weight: 900 !important; 
@@ -66,7 +82,7 @@ def inject_styles():
         font-weight: 900 !important;
     }}
     
-    /* 🔴 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
+    /* 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
     .stButton > button[kind="primary"] {{
         background-color: #ff4b4b !important;
     }}
@@ -74,7 +90,7 @@ def inject_styles():
         background-color: #ff2b2b !important;
     }}
 
-    /* 🔵 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
+    /* 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
     div.stButton:has(button p:contains("2026학년도")) > button,
     div.stButton:has(button:contains("2026학년도")) > button {{
         background-color: #1e40af !important;
@@ -83,6 +99,26 @@ def inject_styles():
     div.stButton:has(button:contains("2026학년도")) > button:hover {{
         background-color: #1d4ed8 !important;
     }}
+
+    /* ------------------------------------------------------------- */
+    /* 💡 [완벽 해결] 학년도 변경 버튼 강제 래퍼 고정 (100% 작동 방식) */
+    .change-year-btn .stButton > button {{
+        background-color: #f3f4f6 !important;
+        color: #000000 !important; /* 글자색을 명확한 검은색으로 고정 */
+        border: 1px solid #cbd5e1 !important;
+        height: 45px !important;   /* 버튼 높이를 작고 얇게 수정 */
+        border-radius: 8px !important;
+    }}
+    .change-year-btn .stButton > button p {{
+        color: #000000 !important; /* 내부 문단 글자도 완벽한 검은색으로 고정 */
+        font-size: 16px !important;
+        font-weight: 800 !important;
+    }}
+    .change-year-btn .stButton > button:hover {{
+        background-color: #e2e8f0 !important;
+        border-color: #94a3b8 !important;
+    }}
+    /* ------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -156,7 +192,7 @@ with st.sidebar:
         page = None
         year = st.session_state.get("entry_year", 2025)
 
-    # 💡 사이드바 하단 PDF 안내서 다운로드 버튼 추가
+    # 사이드바 하단 PDF 안내서 다운로드 버튼
     st.markdown("---")
     st.markdown("### 📥 자료 다운로드")
     pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
@@ -222,8 +258,11 @@ def page_landing():
 def page_home():
     col_l, col_r = st.columns([5, 1])
     with col_r:
+        # 💡 [핵심 교정] 특수 래퍼 박스로 감싸서 버튼이 흰색으로 오염되는 것을 완전히 방어합니다.
+        st.markdown('<div class="change-year-btn">', unsafe_allow_html=True)
         if st.button("🔄 학년도 변경", use_container_width=True):
             st.session_state.year_selected = False; st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
     st.caption("성공적인 고교학점제 마무리를 위한 진로 학업 설계 가이드북")
@@ -348,7 +387,7 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
                 for element in s['description']['content_elements']:
                     st.markdown(f"- {element}")
 
-# ----------------- 12. 페이지: 시뮬레이터 -----------------
+# ----------------- 12. 페이지: 시간표 시뮬레이터 -----------------
 def page_simulator():
     st.markdown("## 📅 시간표 시뮬레이터")
     st.caption("학교지정 과목은 고정 처리됩니다. 학생선택군 카드 내부의 과목 수를 정확히 맞추어 설계해 주세요.")
@@ -479,8 +518,7 @@ def page_career():
     st.markdown("## 🎓 2028 대입 전공 연계 권장 교과 안내")
     if not career: st.info("진로 계열 데이터가 없습니다."); return
     
-    # 💡 [핵심 수정] 빨간색 안내 문구 추가 및 기존 셀렉트박스 레이블 숨김 처리
-    st.markdown("<p style='color: #ff0000; font-size: 20px; font-weight: 900; margin-bottom: 5px;'>🔴 본인의 진로 지향 계열을 선택해 주세요.</p>", unsafe_allow_html=True)
+    st.markdown("<div class='main-red-notice'>🔴 본인의 진로 지향 계열을 선택해 주세요.</div>", unsafe_allow_html=True)
     track = st.selectbox("계열 선택", list(career.keys()), label_visibility="collapsed")
     info = career[track]
 
