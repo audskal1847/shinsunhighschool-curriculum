@@ -25,18 +25,24 @@ def get_base64_of_bin_file(bin_file):
 def inject_styles():
     img_path = ASSETS_DIR / "school_image.png"
     bg_css = ""
-    if img_path.exists():
-        img_b64 = get_base64_of_bin_file(str(img_path))
-        bg_css = f'''
-        .stApp {{
-            background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
-            background-size: cover; background-attachment: fixed;
-        }}
-        '''
+    
+    # 💡 [안전장치] 폴더나 사진 파일이 없어도 에러가 나지 않도록 예외 처리
+    try:
+        if img_path.exists():
+            img_b64 = get_base64_of_bin_file(str(img_path))
+            bg_css = f'''
+            .stApp {{
+                background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}");
+                background-size: cover; background-attachment: fixed;
+            }}
+            '''
+    except Exception:
+        pass
+
     st.markdown(f"""
     <style>
     {bg_css}
-    /* 순정 테두리 박스와 정적 카드를 동시에 제어하여 완벽한 화이트 인디고 카드 구현 */
+    /* 카드 디자인 */
     .subject-card, div[data-testid="stVerticalBlockBorderWrapper"] {{ 
         background: #ffffff !important; 
         border: 2px solid #6366f1 !important; 
@@ -45,6 +51,7 @@ def inject_styles():
         box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; 
         margin-bottom: 10px !important;
     }}
+    /* 기본 텍스트 검은색 강제 (가독성 목적) */
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
     
@@ -479,8 +486,8 @@ def page_career():
     st.markdown("## 🎓 2028 대입 전공 연계 권장 교과 안내")
     if not career: st.info("진로 계열 데이터가 없습니다."); return
     
-    # 💡 [핵심 수정] 빨간색 안내 문구 추가 및 기존 셀렉트박스 레이블 숨김 처리
-    st.markdown("<p style='color: #ff0000; font-size: 20px; font-weight: 900; margin-bottom: 5px;'>🔴 본인의 진로 지향 계열을 선택해 주세요.</p>", unsafe_allow_html=True)
+    # 💡 [핵심 수정] 어떤 디자인 규칙이 있더라도 무조건 빨간색으로 이기도록 강력한 스타일(span 속성) 적용
+    st.markdown("<span style='color: #ff0000 !important; font-size: 22px !important; font-weight: 900 !important; display: block; margin-bottom: 10px;'>🔴 본인의 진로 지향 계열을 선택해 주세요.</span>", unsafe_allow_html=True)
     track = st.selectbox("계열 선택", list(career.keys()), label_visibility="collapsed")
     info = career[track]
 
