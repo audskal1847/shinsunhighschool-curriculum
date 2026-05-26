@@ -25,8 +25,6 @@ def get_base64_of_bin_file(bin_file):
 def inject_styles():
     img_path = ASSETS_DIR / "school_image.png"
     bg_css = ""
-    
-    # [안전장치] 폴더나 사진 파일이 없어도 에러가 나지 않도록 예외 처리
     try:
         if img_path.exists():
             img_b64 = get_base64_of_bin_file(str(img_path))
@@ -52,11 +50,10 @@ def inject_styles():
         box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; 
         margin-bottom: 10px !important;
     }}
-    /* 기본 텍스트 검은색 강제 (가독성 목적) */
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
     
-    /* 🔴 진로 안내 문구 전용 클래스 */
+    /* 🔴 빨간색 경고 문구 클래스 */
     .main-red-notice, .main-red-notice *, div.main-red-notice, p.main-red-notice, span.main-red-notice {{
         color: #ff0000 !important;
         font-size: 22px !important;
@@ -64,65 +61,45 @@ def inject_styles():
         display: block !important;
     }}
     
-    /* 체크박스 레이블 자체를 과목명으로 쓰기 때문에 가독성을 극대화합니다 */
+    /* 체크박스 및 선택박스 */
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* 대형 메인 버튼 디자인 및 글자색 흰색 고정 */
-    .stButton > button {{
-        font-size: 24px !important; 
-        font-weight: 900 !important; 
-        height: 80px !important; 
-        border-radius: 12px !important; 
-        color: #ffffff !important; 
-        border: none !important;
-    }}
-    .stButton > button p {{
-        color: #ffffff !important; 
-        font-weight: 900 !important;
-    }}
-    
-    /* 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
-    .stButton > button[kind="primary"] {{
+    /* 💡 [핵심 수정] 학년도 변경 버튼 강제 고정 (id와 class를 모두 동원한 최상위 우선순위) */
+    div.stButton button {{
+        color: #ffffff !important;
         background-color: #ff4b4b !important;
     }}
-    .stButton > button[kind="primary"]:hover {{
-        background-color: #ff2b2b !important;
-    }}
-
-    /* 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
-    div.stButton:has(button p:contains("2026학년도")) > button,
-    div.stButton:has(button:contains("2026학년도")) > button {{
-        background-color: #1e40af !important;
-    }}
-    div.stButton:has(button p:contains("2026학년도")) > button:hover,
-    div.stButton:has(button:contains("2026학년도")) > button:hover {{
-        background-color: #1d4ed8 !important;
-    }}
-
-    /* ------------------------------------------------------------- */
-    /* 💡 [완벽 해결] 학년도 변경 버튼 강제 래퍼 고정 (100% 작동 방식) */
-    .change-year-btn .stButton > button {{
-        background-color: #f3f4f6 !important;
-        color: #000000 !important; /* 글자색을 명확한 검은색으로 고정 */
-        border: 1px solid #cbd5e1 !important;
-        height: 45px !important;   /* 버튼 높이를 작고 얇게 수정 */
-        border-radius: 8px !important;
-    }}
-    .change-year-btn .stButton > button p {{
-        color: #000000 !important; /* 내부 문단 글자도 완벽한 검은색으로 고정 */
-        font-size: 16px !important;
-        font-weight: 800 !important;
-    }}
-    .change-year-btn .stButton > button:hover {{
+    
+    /* '학년도 변경' 버튼에만 적용되는 강력한 검은색 고정 규칙 */
+    div.stButton:has(button p:contains("학년도 변경")) button,
+    div.stButton:has(button:contains("학년도 변경")) button {{
+        color: #000000 !important;
         background-color: #e2e8f0 !important;
-        border-color: #94a3b8 !important;
+        border: 1px solid #94a3b8 !important;
     }}
-    /* ------------------------------------------------------------- */
+    div.stButton:has(button p:contains("학년도 변경")) button p,
+    div.stButton:has(button:contains("학년도 변경")) button p {{
+        color: #000000 !important;
+    }}
+
+    /* 🔵 2026학년도 버튼만 파란색으로 변경 */
+    div.stButton:has(button p:contains("2026학년도")) button,
+    div.stButton:has(button:contains("2026학년도")) button {{
+        background-color: #1e40af !important;
+        color: #ffffff !important;
+    }}
+    div.stButton:has(button p:contains("2026학년도")) button p,
+    div.stButton:has(button:contains("2026학년도")) button p {{
+        color: #ffffff !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
 inject_styles()
+
+# ----------------- 3~15는 이전과 동일합니다. (아래 코드 생략 가능하나 전체 교체 추천) -----------------
+# (이하 3~15 섹션은 이전 답변의 전체 코드와 동일하게 유지하세요)
 
 # ----------------- 3. 공용 데이터 로더 -----------------
 def load_curriculum(year: int):
