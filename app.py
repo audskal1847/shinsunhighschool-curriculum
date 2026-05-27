@@ -478,7 +478,7 @@ def show_summary(final_ids, auto_ids, picked_ids):
         if picked != target: issues.append(f"묶음 [{g['id']}]: 지정 기준 {target}과목 중 현재 {picked}과목 선택됨")
 
     if not issues and total_credit >= 174:
-        st.markdown("<div class='alert-success'>🎉 <b>교육과정 설계 요건을 완벽히 달성했습니다!</b> 졸업 및 학점 기준 조건에 모두 합격입니다.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='alert-success'>🎉 <b>교육과정 설계 요건을 달성했습니다!</b> 졸업 및 학점 기준 조건 충족했습니다.</div>", unsafe_allow_html=True)
     else:
         msg = "<div class='alert-warning'><b>⚠️ 다음 보완 조치 사항들을 조정해 주세요:</b><ul>"
         for i in issues: msg += f"<li>{i}</li>"
