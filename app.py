@@ -25,8 +25,6 @@ def get_base64_of_bin_file(bin_file):
 def inject_styles():
     img_path = ASSETS_DIR / "school_image.png"
     bg_css = ""
-    
-    # [안전장치] 폴더나 사진 파일이 없어도 에러가 나지 않도록 예외 처리
     try:
         if img_path.exists():
             img_b64 = get_base64_of_bin_file(str(img_path))
@@ -52,11 +50,10 @@ def inject_styles():
         box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; 
         margin-bottom: 10px !important;
     }}
-    /* 기본 텍스트 검은색 강제 (가독성 목적) */
     .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
     
-    /* 🔴 진로 안내 문구 전용 클래스 */
+    /* 🔴 빨간색 경고 문구 클래스 */
     .main-red-notice, .main-red-notice *, div.main-red-notice, p.main-red-notice, span.main-red-notice {{
         color: #ff0000 !important;
         font-size: 22px !important;
@@ -64,61 +61,46 @@ def inject_styles():
         display: block !important;
     }}
     
-    /* 체크박스 레이블 자체를 과목명으로 쓰기 때문에 가독성을 극대화합니다 */
+    /* 체크박스 및 선택박스 */
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* 대형 메인 버튼 디자인 및 글자색 흰색 고정 */
-    .stButton > button {{
+    /* 버튼 래퍼 강제 고정 */
+    div.stButton button {{
+        color: #ffffff !important;
+        background-color: #ff4b4b !important;
         font-size: 24px !important; 
         font-weight: 900 !important; 
         height: 80px !important; 
         border-radius: 12px !important; 
-        color: #ffffff !important; 
         border: none !important;
     }}
-    .stButton > button p {{
-        color: #ffffff !important; 
-        font-weight: 900 !important;
-    }}
     
-    /* 기본 버튼 색상 (2025학년도 기본값: 빨간색) */
-    .stButton > button[kind="primary"] {{
-        background-color: #ff4b4b !important;
-    }}
-    .stButton > button[kind="primary"]:hover {{
-        background-color: #ff2b2b !important;
-    }}
-
-    /* 2026학년도 글씨가 포함된 버튼만 콕 집어서 파란색으로 변경 */
-    div.stButton:has(button p:contains("2026학년도")) > button,
-    div.stButton:has(button:contains("2026학년도")) > button {{
-        background-color: #1e40af !important;
-    }}
-    div.stButton:has(button p:contains("2026학년도")) > button:hover,
-    div.stButton:has(button:contains("2026학년도")) > button:hover {{
-        background-color: #1d4ed8 !important;
-    }}
-
-    /* ------------------------------------------------------------- */
-    /* 💡 [완벽 해결] 학년도 변경 버튼 강제 래퍼 고정 (100% 작동 방식) */
-    .change-year-btn .stButton > button {{
-        background-color: #f3f4f6 !important;
-        color: #000000 !important; /* 글자색을 명확한 검은색으로 고정 */
-        border: 1px solid #cbd5e1 !important;
-        height: 45px !important;   /* 버튼 높이를 작고 얇게 수정 */
-        border-radius: 8px !important;
-    }}
-    .change-year-btn .stButton > button p {{
-        color: #000000 !important; /* 내부 문단 글자도 완벽한 검은색으로 고정 */
-        font-size: 16px !important;
-        font-weight: 800 !important;
-    }}
-    .change-year-btn .stButton > button:hover {{
+    /* 학년도 변경 버튼에만 적용되는 강력한 검은색 고정 규칙 */
+    div.stButton:has(button p:contains("학년도 변경")) button,
+    div.stButton:has(button:contains("학년도 변경")) button {{
+        color: #000000 !important;
         background-color: #e2e8f0 !important;
-        border-color: #94a3b8 !important;
+        border: 1px solid #94a3b8 !important;
+        height: 45px !important;
+        font-size: 16px !important;
     }}
-    /* ------------------------------------------------------------- */
+    div.stButton:has(button p:contains("학년도 변경")) button p,
+    div.stButton:has(button:contains("학년도 변경")) button p {{
+        color: #000000 !important;
+        font-size: 16px !important;
+    }}
+
+    /* 2026학년도 버튼만 파란색으로 변경 */
+    div.stButton:has(button p:contains("2026학년도")) button,
+    div.stButton:has(button:contains("2026학년도")) button {{
+        background-color: #1e40af !important;
+        color: #ffffff !important;
+    }}
+    div.stButton:has(button p:contains("2026학년도")) button p,
+    div.stButton:has(button:contains("2026학년도")) button p {{
+        color: #ffffff !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -177,7 +159,7 @@ def render_made_by():
         </div>
     """, unsafe_allow_html=True)
 
-# ----------------- 7. 네비게이션 및 사이드바 (PDF 다운로드 추가) -----------------
+# ----------------- 7. 네비게이션 및 사이드바 -----------------
 with st.sidebar:
     st.markdown("<p style='font-size: 20px; color: #555555; font-weight: bold;'>⭐주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", unsafe_allow_html=True)
     st.markdown("---")
@@ -192,7 +174,6 @@ with st.sidebar:
         page = None
         year = st.session_state.get("entry_year", 2025)
 
-    # 사이드바 하단 PDF 안내서 다운로드 버튼
     st.markdown("---")
     st.markdown("### 📥 자료 다운로드")
     pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
@@ -215,27 +196,6 @@ SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1
 
 # ----------------- 8. 페이지: 랜딩 -----------------
 def page_landing():
-    st.markdown("""
-    <style>
-    .stButton > button[kind="secondary"] {
-        background-color: #1e40af !important;
-        color: #ffffff !important; 
-        font-size: 24px !important;
-        font-weight: 900 !important;
-        height: 80px !important;
-        border-radius: 12px !important;
-        border: none !important;
-    }
-    .stButton > button[kind="secondary"] p {
-        color: #ffffff !important;
-        font-weight: 900 !important;
-    }
-    .stButton > button[kind="secondary"]:hover {
-        background-color: #1d4ed8 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
     st.markdown("<div style='height: 20vh;'></div>", unsafe_allow_html=True)
     c_l, c_r = st.columns([1, 1], gap="large")
     with c_l:
@@ -258,11 +218,8 @@ def page_landing():
 def page_home():
     col_l, col_r = st.columns([5, 1])
     with col_r:
-        # 💡 [핵심 교정] 특수 래퍼 박스로 감싸서 버튼이 흰색으로 오염되는 것을 완전히 방어합니다.
-        st.markdown('<div class="change-year-btn">', unsafe_allow_html=True)
         if st.button("🔄 학년도 변경", use_container_width=True):
             st.session_state.year_selected = False; st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
     st.caption("성공적인 고교학점제 마무리를 위한 진로 학업 설계 가이드북")
@@ -273,7 +230,7 @@ def page_home():
     with c3: st.markdown(f"<div class='big-card'><h2>52</h2><p>학생선택 학점</p><span class='sub'>최소 택 18과목 이상</span></div>", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 📖 가이드북 100점 활용법")
+    st.markdown("### 📖 이 가이드북 사용법")
     st.markdown("1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 충족해야 하는 영역별 학점 확인\n2. **📚 학년별 교과목 탐색** — 학교에 개설된 모든 과목 상세 정보 파악\n3. **📅 시간표 시뮬레이터** — 모의 선택을 통한 졸업 요건 자가 진단\n4. **🎓 2028 대입 권장 과목** — 본인의 진로 계열과 학과에 최적화된 추천 교과 확인\n5. **🖨️ 결과 출력** — 설계 내용을 확인하고 워드/HTML 파일로 다운로드 보관")
     render_made_by()
 
@@ -348,7 +305,8 @@ def show_semester_subjects(sem_key):
             with st.expander(f"🔵 학생선택 묶음 {gid}{pick_label} · {len(items)}과목 중 선택", expanded=False):
                 for s, c in items: render_subject_card(s, c)
 
-def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=None, checkbox_key=None):
+# 💡 [핵심 수정] 파라미터에서 불필요한 selected_set 제거
+def render_subject_card(s, sem_credit=None, simulator_mode=False, checkbox_key=None):
     credit = sem_credit if sem_credit else s.get("op_credit") or 0
     typ = s.get("type","")
     b_map = {"공통": "badge-type-공통", "일반": "badge-type-일반", "진로": "badge-type-진로", "융합": "badge-type-융합"}
@@ -370,10 +328,9 @@ def render_subject_card(s, sem_credit=None, simulator_mode=False, selected_set=N
         </div>
         """, unsafe_allow_html=True)
         
-        if simulator_mode and selected_set is not None and checkbox_key is not None:
-            val = st.checkbox(s["name"], value=(s["id"] in selected_set), key=checkbox_key)
-            if val: selected_set.add(s["id"])
-            else: selected_set.discard(s["id"])
+        # 💡 [핵심 교정] 더 이상 즉시 add/discard를 하지 않고, 위젯에 key만 달아줍니다.
+        if simulator_mode and checkbox_key is not None:
+            st.checkbox(s["name"], value=st.session_state.get(checkbox_key, False), key=checkbox_key)
         else:
             st.markdown(f"<div style='font-size:18px; font-weight:700; margin-top:4px; color:#000; margin-bottom:8px;'>{s['name']}</div>", unsafe_allow_html=True)
             
@@ -393,9 +350,28 @@ def page_simulator():
     st.caption("학교지정 과목은 고정 처리됩니다. 학생선택군 카드 내부의 과목 수를 정확히 맞추어 설계해 주세요.")
 
     yr_key = str(year)
-    if yr_key not in st.session_state.selected_subjects: st.session_state.selected_subjects[yr_key] = set()
-    selected = st.session_state.selected_subjects[yr_key]
+    if yr_key not in st.session_state.selected_subjects: 
+        st.session_state.selected_subjects[yr_key] = set()
 
+    # 💡 [핵심 동기화 기술] 충돌 방지를 위해 매번 화면을 그릴 때마다 체크박스 상태에서 선택 목록을 100% 실시간으로 재구축합니다.
+    selected = set()
+    for g in curriculum["groups"]:
+        if st.session_state.entry_year == 2025 and any(gid in g["id"] for gid in ["G01", "G02", "G03"]): continue
+        subs = [s for s in curriculum["subjects"] if s["id"] in g["subject_ids"]]
+        for pinfo in g["pick_per_sem"]:
+            if pinfo["pick"] == 1:
+                key = f"groupsel_{g['id']}_{pinfo['sem']}"
+                choice = st.session_state.get(key, "(선택 안 함)")
+                if choice != "(선택 안 함)":
+                    for s in subs:
+                        if s["name"] == choice: selected.add(s["id"])
+            else:
+                for s in subs:
+                    key = f"chk_{g['id']}_{s['id']}"
+                    if st.session_state.get(key, False):
+                        selected.add(s["id"])
+                        
+    st.session_state.selected_subjects[yr_key] = selected
     auto = {s["id"] for s in curriculum["subjects"] if s["section"]=="학교지정" and s["group_id"] is None}
 
     st.markdown("### 🔵 학생선택 묶음 (그룹별 선택)")
@@ -430,13 +406,7 @@ def render_group_picker(g, selected):
             options = ["(선택 안 함)"] + [s["name"] for s in subs]
             key = f"groupsel_{g['id']}_{sem}"
             current_choice = st.session_state.get(key, "(선택 안 함)")
-            choice = st.selectbox(f"  {label} (택 1과목)", options, key=key, index=options.index(current_choice) if current_choice in options else 0)
-            
-            for s in subs: selected.discard(s["id"])
-            if choice != "(선택 안 함)":
-                for s in subs:
-                    if s["name"] == choice: selected.add(s["id"])
-                    
+            st.selectbox(f"  {label} (택 1과목)", options, key=key, index=options.index(current_choice) if current_choice in options else 0)
         else:
             st.caption(f"※ 하단 목록 중 조건에 맞춰 **정확히 {pinfo['pick']}개 과목**을 체크하세요.")
             n_cols = 3
@@ -449,12 +419,15 @@ def render_group_picker(g, selected):
                     s = subs[idx]
                     key = f"chk_{g['id']}_{s['id']}"
                     with cc[ci]:
-                        render_subject_card(s, simulator_mode=True, selected_set=selected, checkbox_key=key)
+                        # 더 이상 selected 세트를 넘기지 않고 독립적으로 렌더링합니다
+                        render_subject_card(s, simulator_mode=True, checkbox_key=key)
             
-            in_sel = [s for s in subs if s["id"] in selected]
-            if len(in_sel) == pinfo["pick"]: st.success(f"✅ 조건 충족 완료 ({len(in_sel)}/{pinfo['pick']})")
-            elif len(in_sel) > pinfo["pick"]: st.error(f"❌ 선택 과목 초과 (기준 대비 {len(in_sel)-pinfo['pick']}개 해제 필요)")
-            elif len(in_sel) > 0: st.warning(f"⚠️ 추가 선택 필요 ({pinfo['pick']-len(in_sel)}개 과목 더 선택)")
+            # 💡 [검증 로직 완벽 교정] 실제 위젯의 체크박스 상태만 읽어와서 카운트를 진행합니다.
+            in_sel_count = sum(1 for s in subs if st.session_state.get(f"chk_{g['id']}_{s['id']}", False))
+            
+            if in_sel_count == pinfo["pick"]: st.success(f"✅ 조건 충족 완료 ({in_sel_count}/{pinfo['pick']})")
+            elif in_sel_count > pinfo["pick"]: st.error(f"❌ 선택 과목 초과 (기준 대비 {in_sel_count-pinfo['pick']}개 해제 필요)")
+            elif in_sel_count > 0: st.warning(f"⚠️ 추가 선택 필요 ({pinfo['pick']-in_sel_count}개 과목 더 선택)")
 
 def show_summary(final_ids, auto_ids, picked_ids):
     total_credit = 0
