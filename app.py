@@ -252,7 +252,7 @@ def page_home():
     with c3: st.markdown(f"<div class='big-card'><h2>52</h2><p>학생선택 학점</p><span class='sub'>최소 택 18과목 이상</span></div>", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 📖 이 가이드북 사용법")
+    st.markdown("### 📖 가이드북 활용법")
     st.markdown("1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 충족해야 하는 영역별 학점 확인\n2. **📚 학년별 교과목 탐색** — 학교에 개설된 모든 과목 상세 정보 파악\n3. **📅 시간표 시뮬레이터** — 모의 선택을 통한 졸업 요건 자가 진단\n4. **🎓 2028 대입 권장 과목** — 본인의 진로 계열과 학과에 최적화된 추천 교과 확인\n5. **🖨️ 결과 출력** — 설계 내용을 확인하고 워드/HTML 파일로 다운로드 보관")
     render_made_by()
 
