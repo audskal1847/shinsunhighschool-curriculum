@@ -1,215 +1,621 @@
 import streamlit as st
-import google.generativeai as genai
-import PyPDF2
-import os
-import glob
-from docx import Document
-from io import BytesIO
-import urllib.parse  # 💡 로컬 파일(HTML) 경로를 한글로 변환하고 읽기 위해 추가된 모듈
+import json, os
+from pathlib import Path
+from collections import defaultdict
+import base64
 
-st.set_page_config(page_title="audskal의 학교생활기록부 분석", layout="wide")
-st.title("🏫 객관적이고 체계적인 학생부 분석")
-st.markdown("API 키에 맞는 최적의 AI 모델을 자동으로 찾아내어 생기부를 체계적으로 분석합니다.")
+# ----------------- 1. 페이지 기본 설정 -----------------
+st.set_page_config(
+    page_title="신선여자고등학교 고교학점제 이수 가이드북",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-@st.cache_data(show_spinner=False)
-def load_reference_pdfs(pdf_list):
-    text = ""
-    for pdf_file in pdf_list:
-        with open(pdf_file, "rb") as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            for page in pdf_reader.pages:
-                extracted = page.extract_text()
-                if extracted:
-                    text += extracted + "\n"
-    return text
+DATA_DIR = Path(__file__).parent / "data"
+ASSETS_DIR = Path(__file__).parent / "assets"
 
+# ----------------- 2. 배경 이미지 처리 및 CSS 주입 -----------------
+@st.cache_data
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def inject_styles():
+    img_path = ASSETS_DIR / "school_image.png"
+    bg_css = ""
+    try:
+        if img_path.exists():
+            img_b64 = get_base64_of_bin_file(str(img_path))
+            bg_css = f'''
+            .stApp {{
+                background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("data:image/png;base64,{img_b64}") !important;
+                background-size: cover !important; 
+                background-attachment: fixed !important;
+            }}
+            '''
+    except Exception:
+        pass
+
+    st.markdown(f"""
+    <style>
+    {bg_css}
+    /* 카드 디자인 */
+    .subject-card, div[data-testid="stVerticalBlockBorderWrapper"] {{ 
+        background: #ffffff !important; 
+        border: 2px solid #6366f1 !important; 
+        border-radius: 12px !important; 
+        padding: 20px !important; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; 
+        margin-bottom: 10px !important;
+    }}
+    .subject-card label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
+    h1, h2, h3, h4, p, div {{ color: #000 !important; font-weight: 800 !important; }}
+    
+    /* 🔴 빨간색 경고 문구 클래스 */
+    .main-red-notice, .main-red-notice *, div.main-red-notice, p.main-red-notice, span.main-red-notice {{
+        color: #ff0000 !important;
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        display: block !important;
+    }}
+    
+    /* 체크박스 및 선택박스 */
+    .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
+    .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
+    
+    /* ---------------------------------------------------------------------- */
+    /* 💡 [핵심 해결 로직] 특정 앵커(이름표) 밑에 있는 버튼만 콕 집어서 디자인 적용 */
+    
+    /* 🔴 2025학년도 버튼 (빨간색) */
+    .element-container:has(.anchor-2025) + .element-container .stButton button {{
+        background-color: #ff4b4b !important;
+        color: #ffffff !important;
+        font-size: 24px !important; 
+        font-weight: 900 !important; 
+        height: 80px !important; 
+        border-radius: 12px !important; 
+        border: none !important;
+    }}
+    .element-container:has(.anchor-2025) + .element-container .stButton button p {{
+        color: #ffffff !important; font-size: 24px !important; font-weight: 900 !important;
+    }}
+    .element-container:has(.anchor-2025) + .element-container .stButton button:hover {{ background-color: #ff2b2b !important; }}
+
+    /* 🔵 2026학년도 버튼 (파란색) */
+    .element-container:has(.anchor-2026) + .element-container .stButton button {{
+        background-color: #1e40af !important;
+        color: #ffffff !important;
+        font-size: 24px !important; 
+        font-weight: 900 !important; 
+        height: 80px !important; 
+        border-radius: 12px !important; 
+        border: none !important;
+    }}
+    .element-container:has(.anchor-2026) + .element-container .stButton button p {{
+        color: #ffffff !important; font-size: 24px !important; font-weight: 900 !important;
+    }}
+    .element-container:has(.anchor-2026) + .element-container .stButton button:hover {{ background-color: #1d4ed8 !important; }}
+
+    /* 🔄 학년도 변경 버튼 (회색 배경, 검은 글씨) */
+    .element-container:has(.anchor-change-year) + .element-container .stButton button {{
+        background-color: #f3f4f6 !important;
+        color: #000000 !important;
+        border: 1px solid #cbd5e1 !important;
+        height: 45px !important;
+        border-radius: 8px !important;
+    }}
+    .element-container:has(.anchor-change-year) + .element-container .stButton button p {{
+        color: #000000 !important; font-size: 16px !important; font-weight: 800 !important;
+    }}
+    .element-container:has(.anchor-change-year) + .element-container .stButton button:hover {{
+        background-color: #e2e8f0 !important; border-color: #94a3b8 !important;
+    }}
+    /* ---------------------------------------------------------------------- */
+    </style>
+    """, unsafe_allow_html=True)
+
+inject_styles()
+
+# ----------------- 3. 공용 데이터 로더 -----------------
+def load_curriculum(year: int):
+    path = DATA_DIR / f"curriculum_{year}.json"
+    with open(path, "r", encoding="utf-8") as f: 
+        return json.load(f)
+
+@st.cache_data
+def load_career():
+    path = DATA_DIR / "career_recommendations.json"
+    return json.load(open(path, "r", encoding="utf-8")) if path.exists() else {}
+
+@st.cache_data
+def load_teacher_comments():
+    path = DATA_DIR / "teacher_comments.json"
+    return json.load(open(path, "r", encoding="utf-8")) if path.exists() else {}
+
+# ----------------- 4. 글로벌 디자인 및 컴포넌트 CSS -----------------
+st.markdown("""
+<style>
+.big-card { background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%); border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%; }
+.big-card h2 { background: linear-gradient(90deg, #4f46e5, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 56px; margin: 0; font-weight: 800; }
+.big-card p { color: #4b5563; margin: 8px 0 0 0; font-weight: 600; }
+.big-card .sub { color: #6b7280; font-size: 13px; margin-top: 4px; }
+.badge { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-right: 4px; }
+.badge-area { background: #f3f4f6; color: #374151; }
+.badge-type-공통 { background: #dbeafe; color: #1e40af; }
+.badge-type-일반 { background: #ede9fe; color: #5b21b6; }
+.badge-type-진로 { background: #fef3c7; color: #92400e; }
+.badge-type-융합 { background: #fce7f3; color: #9d174d; }
+.badge-req { background: #dcfce7; color: #166534; }
+.badge-sel { background: #fef9c3; color: #854d0e; }
+.title-gradient { background: linear-gradient(90deg, #4f46e5 0%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+.landing-title-pink { color: #f4a8b8; font-size: 46px; font-weight: 900; margin: 0; }
+.landing-title-black { color: #1f2937; font-size: 38px; font-weight: 900; margin: 5px 0 0 0; }
+.alert-success { background:#f0fdf4; border-left:4px solid #22c55e; padding:12px; border-radius:8px; color: #166534; }
+.alert-warning { background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; border-radius:8px; color: #92400e; }
+</style>
+""", unsafe_allow_html=True)
+
+# ----------------- 5. 세션 상태 초기화 -----------------
+if "entry_year" not in st.session_state: st.session_state.entry_year = 2025
+if "year_selected" not in st.session_state: st.session_state.year_selected = False
+if "selected_subjects" not in st.session_state: st.session_state.selected_subjects = {}
+
+# ----------------- 6. 하단 고정 공용 푸터 -----------------
+def render_made_by():
+    st.markdown("""
+        <div style='text-align: center; padding: 24px 0; border-top: 2px solid #e5e7eb; margin-top: 60px;'>
+            <p style='font-size: 20px; margin: 0; color: #374151; font-weight: 900;'>만든 이: 신선여자고등학교 교육과정부 & 교무부</p>
+            <p style='font-size: 18px; margin: 6px 0 0 0; color: #4b5563; font-weight: 800;'>🗓️ 2026.05</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+# ----------------- 7. 네비게이션 및 사이드바 -----------------
 with st.sidebar:
-    st.header("🔑 기본 설정")
-    api_key = st.text_input("API 키를 입력하세요", type="password")
-    st.markdown("[👉 무료 API 키 발급받기](https://aistudio.google.com/app/apikey)")
+    st.markdown("<p style='font-size: 20px; color: #555555; font-weight: bold;'>⭐주체적인 삶의 주인공으로 거듭나는 신선여고인을 응원합니다.</p>", unsafe_allow_html=True)
+    st.markdown("---")
+    
+    if st.session_state.get("year_selected", False):
+        year = st.radio("입학년도 선택", [2025, 2026], format_func=lambda y: f"{y}학년도 입학생 ({'현재 2학년' if y==2025 else '현재 1학년'})", index=0 if st.session_state.entry_year != 2026 else 1)
+        st.session_state.entry_year = year
+        st.markdown("---")
+        page = st.radio("메뉴", ["🏠 홈", "🗺️ 핵심 이수 경로", "📚 학년별 교과목 탐색", "📅 시간표 시뮬레이터", "🎓 2028 대입 권장 과목", "🖨️ 결과 출력"])
+    else:
+        st.info("👉 입학년도를 먼저 선택하세요.")
+        page = None
+        year = st.session_state.get("entry_year", 2025)
+
+    st.markdown("---")
+    st.markdown("### 📥 자료 다운로드")
+    pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
+    if pdf_path.exists():
+        with open(pdf_path, "rb") as pdf_file:
+            st.download_button(
+                label="📄 선택과목 안내서 다운로드",
+                data=pdf_file,
+                file_name="2026_선택과목_안내서.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+    else:
+        st.caption("※ 'assets' 폴더에 '2026.subjectguidebook.pdf' 파일을 넣으면 다운로드 버튼이 활성화됩니다.")
+
+curriculum = load_curriculum(year)
+career = load_career()
+comments = load_teacher_comments()
+SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1학기", "2-2":"2학년 2학기", "3-1":"3학년 1학기", "3-2":"3학년 2학기", "3-annual": "3학년 (연간)"}
+
+# ----------------- 8. 페이지: 랜딩 -----------------
+def page_landing():
+    st.markdown("<div style='height: 20vh;'></div>", unsafe_allow_html=True)
+    c_l, c_r = st.columns([1, 1], gap="large")
+    with c_l:
+        sub_l, sub_r = st.columns([1, 4])
+        with sub_l:
+            if (ASSETS_DIR / "logo.png").exists(): st.image(str(ASSETS_DIR / "logo.png"), width=130)
+        with sub_r:
+            st.markdown("<h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2>", unsafe_allow_html=True)
+    with c_r:
+        st.markdown("<p style='color: #1f2937; font-size: 24px; font-weight: 900; margin-bottom: 20px;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
+        
+        # 💡 [핵심 교정] 버튼 바로 위에 전용 이름표(Anchor)를 달아서 확실하게 디자인을 분리 적용합니다.
+        st.markdown("<div class='anchor-2025'></div>", unsafe_allow_html=True)
+        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True):
+            st.session_state.entry_year = 2025; st.session_state.year_selected = True; st.rerun()
+            
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        
+        # 💡 [핵심 교정] 2026학년도 전용 이름표 (파란색 버튼용)
+        st.markdown("<div class='anchor-2026'></div>", unsafe_allow_html=True)
+        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True):
+            st.session_state.entry_year = 2026; st.session_state.year_selected = True; st.rerun()
+            
+    st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
+    render_made_by()
+
+# ----------------- 9. 페이지: 홈 -----------------
+def page_home():
+    col_l, col_r = st.columns([5, 1])
+    with col_r:
+        # 💡 [핵심 교정] 학년도 변경 버튼 전용 이름표
+        st.markdown("<div class='anchor-change-year'></div>", unsafe_allow_html=True)
+        if st.button("🔄 학년도 변경", use_container_width=True):
+            st.session_state.year_selected = False; st.rerun()
+
+    st.markdown(f"<h1><span class='title-gradient'>{year}학년도 입학생</span><br>고교학점제 이수 가이드북</h1>", unsafe_allow_html=True)
+    st.caption("성공적인 고교학점제 마무리를 위한 진로 학업 설계 가이드북")
+    
+    c1, c2, c3 = st.columns(3)
+    with c1: st.markdown(f"<div class='big-card'><h2>192</h2><p>졸업 필수 학점</p><span class='sub'>교과 174 + 창체 18</span></div>", unsafe_allow_html=True)
+    with c2: st.markdown(f"<div class='big-card'><h2>122</h2><p>학교지정 학점</p><span class='sub'>필수 이수 공통과목</span></div>", unsafe_allow_html=True)
+    with c3: st.markdown(f"<div class='big-card'><h2>52</h2><p>학생선택 학점</p><span class='sub'>최소 택 18과목 이상</span></div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 📖 이 가이드북 사용법")
+    st.markdown("1. **🗺️ 핵심 이수 경로** — 졸업까지 반드시 충족해야 하는 영역별 학점 확인\n2. **📚 학년별 교과목 탐색** — 학교에 개설된 모든 과목 상세 정보 파악\n3. **📅 시간표 시뮬레이터** — 모의 선택을 통한 졸업 요건 자가 진단\n4. **🎓 2028 대입 권장 과목** — 본인의 진로 계열과 학과에 최적화된 추천 교과 확인\n5. **🖨️ 결과 출력** — 설계 내용을 확인하고 워드/HTML 파일로 다운로드 보관")
+    render_made_by()
+
+# ----------------- 10. 페이지: 핵심 이수 경로 -----------------
+def page_core_path():
+    st.markdown("## 🗺️ 핵심 이수 경로")
+    areas = curriculum["area_requirements"]
+    groups_display = [
+        ("📘 기초 교과 (국·수·영)", ["국어","수학","영어"], "지정 교과만 정상 이수하면 기준 자동 도달"),
+        ("🔬 탐구 교과 (사회·과학)", ["사회","과학"], "융합과 선택 지정을 고르게 이수하여 충족"),
+        ("👟 체육 교과", ["체육"], "3개 학년 내내 단절 없이 연속 수강 필요"),
+        ("🎨 예술 교과", ["예술"], "음악과 미술 간 학기별 상호 교차 집중 수강"),
+        ("📐 기술·가정/정보/외국어/교양", ["기술.가정/정보","교양","제2외국어/한문"], "세부 영역 합산 총 16학점 필수 필수"),
+    ]
+    cols = st.columns(3)
+    for i, (title, area_list, desc) in enumerate(groups_display):
+        with cols[i % 3]:
+            req, total = 0, 0
+            for a in area_list:
+                if a in areas:
+                    req += areas[a].get("required", 0)
+                    total += areas[a].get("total", 0)
+            if "공동 합계" in str([areas[a].get("note","") for a in area_list if a in areas]):
+                total = areas[area_list[0]].get("total", 0)
+                req = areas[area_list[0]].get("required", 0)
+            st.markdown(f"<div class='subject-card' style='min-height:140px'><div style='font-weight:700; font-size:16px; margin-bottom:6px'>{title}</div><div style='color:#4f46e5; font-weight:600'>필수 최소 {req if req > 0 else '-'}학점 / 총 운영 {total}학점</div><div style='color:#6b7280; font-size:13px; margin-top:8px'>{desc}</div></div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 📋 영역별 상세 학점 구조")
+    rows = [{"교과(군)": a, "총 운영학점": info.get("total"), "필수 이수학점": info.get("required"), "비고": info.get("note", "")} for a, info in areas.items()]
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+    render_made_by()
+
+# ----------------- 11. 페이지: 학년별 교과목 탐색 -----------------
+def page_explore():
+    st.markdown("## 📚 학년별 개설 교과목 탐색")
+    tab1, tab2, tab3 = st.tabs(["1학년", "2학년", "3학년"])
+    for tab, grade in [(tab1,1),(tab2,2),(tab3,3)]:
+        with tab:
+            sem_cols = st.columns(2)
+            for idx, sem_num in enumerate([1,2]):
+                sem_key = f"{grade}-{sem_num}"
+                with sem_cols[idx]:
+                    st.markdown(f"#### 📅 {grade}학년 {sem_num}학기 개설 과목")
+                    show_semester_subjects(sem_key)
+    render_made_by()
+
+def show_semester_subjects(sem_key):
+    subs = []
+    for s in curriculum["subjects"]:
+        added = False
+        for sem in s.get("semesters", []):
+            if sem["sem"] == sem_key or (sem["sem"] == "3-annual" and sem_key.startswith("3-")):
+                subs.append((s, sem["credit"])); added = True; break
+        if not added:
+            for n in s.get("notes", []):
+                if n["sem"] == sem_key or (n["sem"] == "3-annual" and sem_key.startswith("3-")):
+                    subs.append((s, s.get("op_credit") or 0)); break
+
+    required = [(s,c) for (s,c) in subs if s["section"]=="학교지정"]
+    selective = [(s,c) for (s,c) in subs if s["section"]=="학생선택"]
+
+    if required:
+        with st.expander(f"✅ 필수 이수 과목 ({len(required)}과목)", expanded=True):
+            for s, c in required: render_subject_card(s, c)
+    if selective:
+        gmap = defaultdict(list)
+        for s, c in selective: gmap[s["group_id"]].append((s,c))
+        for gid, items in gmap.items():
+            g = next((x for x in curriculum["groups"] if x["id"]==gid), None)
+            pick_label = f" (택{g['pick_per_sem'][0]['pick']})" if g and g.get("pick_per_sem") else ""
+            with st.expander(f"🔵 학생선택 묶음 {gid}{pick_label} · {len(items)}과목 중 선택", expanded=False):
+                for s, c in items: render_subject_card(s, c)
+
+def render_subject_card(s, sem_credit=None, simulator_mode=False, checkbox_key=None):
+    credit = sem_credit if sem_credit else s.get("op_credit") or 0
+    typ = s.get("type","")
+    b_map = {"공통": "badge-type-공통", "일반": "badge-type-일반", "진로": "badge-type-진로", "융합": "badge-type-융합"}
+    b_cls = b_map.get(typ, "badge-area")
+    req_badge = "<span class='badge badge-req'>필수</span>" if s["section"]=="학교지정" else "<span class='badge badge-sel'>선택</span>"
+    yrk = str(curriculum["entry_year"])
+    tc = comments.get(yrk, {}).get(s["name"], None)
+    tc_html = f"<div style='margin-top:6px; padding:8px; background:#f9fafb; border-radius:6px; font-size:12px; color:#4b5563'>💬 {tc['comment']}</div>" if tc and tc.get("comment") else ""
+    
+    with st.container(border=True):
+        st.markdown(f"""
+        <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;'>
+            <div>
+                <span class='badge badge-area'>{s['area']}</span>
+                <span class='badge {b_cls}'>{typ}</span>
+                {req_badge}
+            </div>
+            <div style='color:#4f46e5; font-weight:700;'>{credit}학점</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if simulator_mode and checkbox_key is not None:
+            st.checkbox(s["name"], value=st.session_state.get(checkbox_key, False), key=checkbox_key)
+        else:
+            st.markdown(f"<div style='font-size:18px; font-weight:700; margin-top:4px; color:#000; margin-bottom:8px;'>{s['name']}</div>", unsafe_allow_html=True)
+            
+        if tc_html:
+            st.markdown(tc_html, unsafe_allow_html=True)
+            
+        if "description" in s:
+            with st.expander("📖 과목 가이드 (핵심 아이디어 및 내용 요소)"):
+                st.markdown(f"**📌 핵심 아이디어**<br>{s['description']['core_idea']}", unsafe_allow_html=True)
+                st.markdown("**📋 단원 핵심 내용 요소**", unsafe_allow_html=True)
+                for element in s['description']['content_elements']:
+                    st.markdown(f"- {element}")
+
+# ----------------- 12. 페이지: 시간표 시뮬레이터 -----------------
+def page_simulator():
+    st.markdown("## 📅 시간표 시뮬레이터")
+    st.caption("학교지정 과목은 고정 처리됩니다. 학생선택군 카드 내부의 과목 수를 정확히 맞추어 설계해 주세요.")
+
+    yr_key = str(year)
+    if yr_key not in st.session_state.selected_subjects: 
+        st.session_state.selected_subjects[yr_key] = set()
+
+    selected = set()
+    for g in curriculum["groups"]:
+        if st.session_state.entry_year == 2025 and any(gid in g["id"] for gid in ["G01", "G02", "G03"]): continue
+        subs = [s for s in curriculum["subjects"] if s["id"] in g["subject_ids"]]
+        for pinfo in g["pick_per_sem"]:
+            if pinfo["pick"] == 1:
+                key = f"groupsel_{g['id']}_{pinfo['sem']}"
+                choice = st.session_state.get(key, "(선택 안 함)")
+                if choice != "(선택 안 함)":
+                    for s in subs:
+                        if s["name"] == choice: selected.add(s["id"])
+            else:
+                for s in subs:
+                    key = f"chk_{g['id']}_{s['id']}"
+                    if st.session_state.get(key, False):
+                        selected.add(s["id"])
+                        
+    st.session_state.selected_subjects[yr_key] = selected
+    auto = {s["id"] for s in curriculum["subjects"] if s["section"]=="학교지정" and s["group_id"] is None}
+
+    st.markdown("### 🔵 학생선택 묶음 (그룹별 선택)")
+    for g in curriculum["groups"]:
+        if st.session_state.entry_year == 2025 and any(gid in g["id"] for gid in ["G01", "G02", "G03"]):
+            continue
+        if g["id"].startswith("2025-G") or g["id"].startswith("2026-G"):
+            render_group_picker(g, selected)
+            
+    st.markdown("### 🟣 제2외국어 및 한문 학년 단위 지정군")
+    for g in curriculum["groups"]:
+        if g["id"].endswith("H01"):
+            render_group_picker(g, selected)
+
+    final = selected | auto
+    st.markdown("---")
+    st.markdown("### 📊 이수 학점 종합 결과")
+    show_summary(final, auto, selected)
+    render_made_by()
+
+def render_group_picker(g, selected):
+    subs = [s for s in curriculum["subjects"] if s["id"] in g["subject_ids"]]
+    pick_total = sum(p["pick"] for p in g["pick_per_sem"])
+    sem_labels = ", ".join(SEM_LABELS.get(p["sem"], p["sem"]) + f" 택{p['pick']}" for p in g["pick_per_sem"])
+    st.markdown(f"**[{g['id']}] {sem_labels}** (연간 총 {g.get('total_credit','-')}학점 이수)")
+
+    for pinfo in g["pick_per_sem"]:
+        sem = pinfo["sem"]
+        label = "3학년 제2외국어 연간 선택과목" if sem == "3-annual" else SEM_LABELS.get(sem, sem)
+        
+        if pinfo["pick"] == 1:
+            options = ["(선택 안 함)"] + [s["name"] for s in subs]
+            key = f"groupsel_{g['id']}_{sem}"
+            current_choice = st.session_state.get(key, "(선택 안 함)")
+            st.selectbox(f"  {label} (택 1과목)", options, key=key, index=options.index(current_choice) if current_choice in options else 0)
+        else:
+            st.caption(f"※ 하단 목록 중 조건에 맞춰 **정확히 {pinfo['pick']}개 과목**을 체크하세요.")
+            n_cols = 3
+            rows = (len(subs) + n_cols - 1) // n_cols
+            for ri in range(rows):
+                cc = st.columns(n_cols)
+                for ci in range(n_cols):
+                    idx = ri * n_cols + ci
+                    if idx >= len(subs): break
+                    s = subs[idx]
+                    key = f"chk_{g['id']}_{s['id']}"
+                    with cc[ci]:
+                        render_subject_card(s, simulator_mode=True, checkbox_key=key)
+            
+            in_sel_count = sum(1 for s in subs if st.session_state.get(f"chk_{g['id']}_{s['id']}", False))
+            
+            if in_sel_count == pinfo["pick"]: st.success(f"✅ 조건 충족 완료 ({in_sel_count}/{pinfo['pick']})")
+            elif in_sel_count > pinfo["pick"]: st.error(f"❌ 선택 과목 초과 (기준 대비 {in_sel_count-pinfo['pick']}개 해제 필요)")
+            elif in_sel_count > 0: st.warning(f"⚠️ 추가 선택 필요 ({pinfo['pick']-in_sel_count}개 과목 더 선택)")
+
+def show_summary(final_ids, auto_ids, picked_ids):
+    total_credit = 0
+    by_area = {}
+    by_sem = {f"{g}-{s}":0 for g in (1,2,3) for s in (1,2)}
+    by_type = {"공통":0,"일반":0,"진로":0,"융합":0}
+
+    for sid in final_ids:
+        s = next((x for x in curriculum["subjects"] if x["id"]==sid), None)
+        if not s: continue
+        
+        if s.get("semesters"):
+            for sem in s["semesters"]:
+                c = sem["credit"]
+                total_credit += c
+                by_area[s["area"]] = by_area.get(s["area"],0) + c
+                sem_key = "3-1" if sem["sem"] == "3-annual" else sem["sem"]
+                by_sem[sem_key] = by_sem.get(sem_key,0) + c
+                by_type[s.get("type","")] = by_type.get(s.get("type",""),0) + c
+        else:
+            c = s.get("op_credit") or 0
+            total_credit += c
+            by_area[s["area"]] = by_area.get(s["area"],0) + c
+            by_type[s.get("type","")] = by_type.get(s.get("type",""),0) + c
+
+    grand = total_credit + 18
+
+    c1,c2,c3,c4 = st.columns(4)
+    c1.metric("총 교과 이수학점", f"{total_credit}", delta="기준 174학점")
+    c2.metric("창의적 체험활동", "18학점", delta="고정 이수")
+    c3.metric("최종 합계 학점", f"{grand}", delta="졸업 요건 192")
+    c4.metric("최종 담은 과목 수", f"{len(final_ids)}개")
+
+    st.markdown("#### 📐 교과군 필수 조건 만족 점검")
+    req_data = []
+    for a, info in curriculum["area_requirements"].items():
+        got = by_area.get(a, 0)
+        req = info.get("required") or 0
+        status = "✅ 충족" if got >= req else "❌ 미달"
+        req_data.append({"교과 영역군": a, "현재설계학점": got, "필수최소학점": req, "달성 비율": f"{(got/req*100) if req else 0:.0f}%", "판정": status, "교과 상세 안내": info.get("note","")})
+    st.dataframe(req_data, use_container_width=True, hide_index=True)
+
+    issues = []
+    for g in curriculum["groups"]:
+        if st.session_state.entry_year == 2025 and any(gid in g["id"] for gid in ["G01", "G02", "G03"]): continue
+        picked = sum(1 for sid in g["subject_ids"] if sid in picked_ids)
+        target = sum(p["pick"] for p in g["pick_per_sem"])
+        if picked != target: issues.append(f"묶음 [{g['id']}]: 지정 기준 {target}과목 중 현재 {picked}과목 선택됨")
+
+    if not issues and total_credit >= 174:
+        st.markdown("<div class='alert-success'>🎉 <b>교육과정 설계 요건을 달성했습니다!</b> 졸업 및 학점 기준 조건 충족했습니다.</div>", unsafe_allow_html=True)
+    else:
+        msg = "<div class='alert-warning'><b>⚠️ 다음 보완 조치 사항들을 조정해 주세요:</b><ul>"
+        for i in issues: msg += f"<li>{i}</li>"
+        if total_credit < 174: msg += f"<li>교과 전체 총이수 전체 학점이 부족합니다. (현재 {total_credit}학점 / 최소 기준 174학점)</li>"
+        msg += "</ul></div>"
+        st.markdown(msg, unsafe_allow_html=True)
+
+# ----------------- 13. 페이지: 대입 권장 과목 -----------------
+def page_career():
+    st.markdown("## 🎓 2028 대입 전공 연계 권장 교과 안내")
+    if not career: st.info("진로 계열 데이터가 없습니다."); return
+    
+    st.markdown("<div class='main-red-notice'>🔴 본인의 진로 지향 계열을 선택해 주세요.</div>", unsafe_allow_html=True)
+    track = st.selectbox("계열 선택", list(career.keys()), label_visibility="collapsed")
+    info = career[track]
+
+    st.markdown(f"### 🎯 계열 가이드: {track}")
+    st.write(f"**직무 및 전공 설명:** {info.get('summary','')}")
+    st.info(f"💡 {info.get('탐구과목_안내','')}")
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("#### 🟢 학과별 필수 권장 교과 목록")
+        for n in info.get("필수권장", []):
+            offered = any(s["name"]==n or n in s["name"] for s in curriculum["subjects"])
+            st.markdown(f"- {'✅' if offered else '⚠️'} **{n}** {'(본교 개설)' if offered else '(개별 보완 필요)'}")
+    with c2:
+        st.markdown("#### ✨ 학생부 종합 우대 반영 교과 목록")
+        for n in info.get("우대", []):
+            offered = any(s["name"]==n or n in s["name"] for s in curriculum["subjects"])
+            st.markdown(f"- {'✅' if offered else '⚠️'} **{n}** {'(본교 개설)' if offered else '(개별 보완 필요)'}")
+    render_made_by()
+
+# ----------------- 14. 페이지: 결과 출력 보고서 -----------------
+def page_print():
+    st.markdown("## 🖨️ 최종 결과 내역 및 보관")
+    st.caption("시뮬레이터에서 선택한 결과가 아래에 실시간으로 표시됩니다. 내용을 확인하고 파일로 다운로드하세요.")
+
+    yr_key = str(year)
+    picked = st.session_state.selected_subjects.get(yr_key, set())
+    auto = {s["id"] for s in curriculum["subjects"] if s["section"]=="학교지정" and s["group_id"] is None}
+    final = picked | auto
+
+    c1, c2, c3 = st.columns(3)
+    with c1: name = st.text_input("학생 성명 (선택사항)", "")
+    with c2: sclass = st.text_input("학번 고유 정보 (선택사항)", "")
+    with c3: counselor = st.text_input("상담 확인 교사 (선택사항)", "")
+
+    html = build_report_html(name, sclass, counselor, final)
     
     st.markdown("---")
-    st.subheader("📚 내장된 평가 기준 파일 (참고용)")
-    pdf_files = glob.glob("*.pdf")
-    if pdf_files:
-        for f in pdf_files:
-            st.write(f"- {f}")
-    else:
-        st.error("폴더에 기준 PDF 파일이 없습니다!")
-
-col1, col2 = st.columns([1, 1])
-
-with col1:
-    st.subheader("1. 학교생활기록부 데이터 입력")
-    st.info("💡 나이스(NEIS) 원본 PDF는 보안상 안 읽히는 경우가 많습니다. 가급적 아래 빈칸에 내용을 직접 긁어서 붙여넣으세요!")
+    st.markdown("### 📥 파일 다운로드 및 인쇄")
     
-    student_file = st.file_uploader("📂 학생 생기부 파일 (PDF) 업로드", type=["pdf"])
-    st.markdown("**-- 또는 --**")
-    student_text_input = st.text_area("📝 생기부 내용 직접 붙여넣기 (추천)", height=250)
-
-with col2:
-    st.subheader("2. 학생부 분석을 위한 추가 정보 입력")
-    teacher_context = st.text_area(
-        "💡 특이사항 및 희망 전공 (예: 전기전자공학 진학 희망)", 
-        height=70
-    )
-    
-    # --- [수정된 부분] 선생님이 요청하신 로컬 링크를 기본값으로 셋팅 ---
-    default_book_link = "file:///D:/%EC%9B%90%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B8%8C/OneDrive%20-%20%EC%9A%B8%EC%82%B0%EA%B4%91%EC%97%AD%EC%8B%9C%EA%B5%90%EC%9C%A1%EC%B2%AD/%EB%AC%B8%EC%84%9C/%EC%B9%B4%EC%B9%B4%EC%98%A4%ED%86%A1%20%EB%B0%9B%EC%9D%80%20%ED%8C%8C%EC%9D%BC/%EB%AF%B8%EB%9E%98%EB%A5%BC%20%EC%97%AC%EB%8A%94%20%EC%84%9C%EC%9E%AC(%EB%82%B4%EC%9D%BC%EA%B5%90%EC%9C%A1%20%EA%B6%8C%EC%9E%A5%EB%8F%84%EC%84%9C%20%EA%B4%80%EB%A0%A8%20%EA%B8%B0%EC%82%AC%20%EA%B2%80%EC%83%89-%EC%8B%A0%EC%84%A0%EC%97%AC%EA%B3%A0%20%EC%9E%84%EC%A2%85%EC%9A%B0).html"
-    
-    book_reference = st.text_input(
-        "🔗 추천 도서 참고 링크 또는 목록 (선택)", 
-        value=default_book_link,  # 화면을 켜면 이 값이 항상 기본으로 들어가게 됩니다.
-        placeholder="도서 링크 또는 목록 입력 (비워두면 AI 자체 데이터 활용)"
-    )
-    
-    submit_btn = st.button("↵ 🚀 심층 분석 시작 (클릭)", type="primary", use_container_width=True)
-
-st.markdown("---")
-
-def create_word_file(text):
-    doc = Document()
-    doc.add_heading('AI 생기부 분석 결과 보고서', 0)
-    doc.add_paragraph(text)
-    
-    file_stream = BytesIO()
-    doc.save(file_stream)
-    file_stream.seek(0)
-    return file_stream
-
-if submit_btn:
-    if not api_key:
-        st.error("왼쪽에 API 키를 먼저 입력해 주세요!")
-    elif not pdf_files:
-        st.error("기준이 될 PDF 파일이 폴더에 없습니다!")
-    elif not student_file and not student_text_input.strip():
-        st.error("학생의 생기부 파일(PDF)을 업로드하거나 텍스트를 직접 붙여넣어 주세요!")
-    else:
-        status_box = st.empty()
+    d1, d2, d3 = st.columns(3)
+    with d1:
+        st.download_button("📥 MS Word 문서 다운로드 (.doc)", data=html.encode('utf-8-sig'), file_name=f"신선여고_이수계획서_{name or '학생용'}.doc", mime="application/msword", use_container_width=True)
+    with d2:
+        st.download_button("📥 웹 HTML 원본 다운로드", data=html.encode('utf-8'), file_name=f"신선여고_이수계획서_{name or '학생용'}.html", mime="text/html", use_container_width=True)
+    with d3:
+        rows = ["영역,교과유형,과목명,운영학점,배정구분"]
+        for sid in sorted(final):
+            s = next((x for x in curriculum["subjects"] if x["id"]==sid), None)
+            if s: rows.append(f'"{s["area"]}","{s.get("type","")}","{s["name"]}",{s.get("op_credit","")},"{s["section"]}"')
+        st.download_button("📥 Excel 연동 CSV 다운로드", data="\n".join(rows).encode("utf-8-sig"), file_name=f"신선여고_선택교과목록_{name or '학생용'}.csv", mime="text/csv", use_container_width=True)
         
-        try:
-            status_box.info("⏳ [진행상황 1/4] 내장된 가이드북(PDF)을 읽고 암기하는 중입니다...")
-            reference_text = load_reference_pdfs(pdf_files)
-            
-            status_box.info("⏳ [진행상황 2/4] 학생의 생기부 데이터를 추출하는 중입니다...")
-            student_data_text = ""
-            
-            if student_text_input.strip():
-                student_data_text = student_text_input
-            elif student_file:
-                student_pdf_reader = PyPDF2.PdfReader(student_file)
-                for page in student_pdf_reader.pages:
-                    text = page.extract_text()
-                    if text:
-                        student_data_text += text + "\n"
-            
-            if not student_data_text.strip():
-                raise Exception("업로드하신 PDF 파일에서 글씨를 읽을 수 없습니다! PDF 대신 왼쪽 빈칸에 생기부 내용을 직접 마우스로 긁어서 붙여넣어 주세요.")
-            
-            # --- 💡 [마법의 코드 추가] 로컬 HTML 파일을 파이썬이 대신 읽어서 AI에게 전달 ---
-            status_box.info("📚 [도서 연동] 추천 도서 데이터를 불러오는 중입니다...")
-            actual_book_data = book_reference
-            
-            # 링크가 file:/// 로 시작한다면 내 PC에 있는 파일이므로 열어서 읽어옵니다.
-            if book_reference.startswith("file:///"):
-                try:
-                    # %EC%9B 와 같이 깨진 주소를 원래 한글 폴더명으로 복구합니다.
-                    local_path = urllib.parse.unquote(book_reference.replace("file:///", ""))
-                    if os.path.exists(local_path):
-                        with open(local_path, "r", encoding="utf-8", errors='ignore') as f:
-                            actual_book_data = f.read() # HTML 문서 내용을 통째로 변수에 저장
-                    else:
-                        st.warning("⚠️ 지정된 경로에서 도서 HTML 파일을 찾을 수 없어 AI 자체 데이터를 대신 활용합니다.")
-                        actual_book_data = "제공된 파일 없음. AI 내장 권장 도서 활용 요망."
-                except Exception as e:
-                    actual_book_data = "제공된 파일 없음. AI 내장 권장 도서 활용 요망."
+    st.info("💡 **가장 깔끔한 PDF 보관 팁:** 하단 미리보기 창 영역 내부 혹은 HTML 다운로드 파일을 연 후 브라우저 단축키 **인쇄(Ctrl + P)** 명령을 실행한 뒤, 프린터 대상을 **'PDF로 저장'** 파일 형태로 저장하시면 깨짐 없는 서식 본문 그대로 영구 저장이 가능합니다.")
+    
+    st.markdown("### 📄 내 선택 결과 미리보기")
+    st.components.v1.html(html, height=800, scrolling=True)
+    render_made_by()
 
-            status_box.warning("🔍 [진행상황 3/4] 최적의 구글 AI 모델을 탐색 중입니다...")
-            genai.configure(api_key=api_key)
-            
-            best_model_name = ""
-            for m in genai.list_models():
-                if 'generateContent' in m.supported_generation_methods:
-                    best_model_name = m.name.replace("models/", "")
-                    if 'flash' in best_model_name or 'pro' in best_model_name:
-                        break 
-            
-            if best_model_name == "":
-                raise Exception("사용할 수 있는 AI 모델이 없습니다.")
-            
-            status_box.success(f"🤖 [진행상황 4/4] AI 엔진('{best_model_name}') 장착 완료! 객관적 경쟁력 분석을 시작합니다...")
-            model = genai.GenerativeModel(best_model_name)
-            
-            prompt = f"""
-            당신은 20년 경력의 대한민국 최고 수석 진학 상담 교사입니다.
-            아래에 제공된 [대학 평가 기준 자료]는 훌륭한 학생부를 판단하기 위한 '참고용 범용 벤치마크(기준점)'입니다.
-            이 기준점들에 비추어 보았을 때, [업로드된 학생의 생기부 내용]이 가진 객관적인 경쟁력과 역량 수준을 날카롭게 분석해 주세요.
+def build_report_html(name, sclass, counselor, final_ids):
+    subs = [s for s in curriculum["subjects"] if s["id"] in final_ids]
+    by_sem = defaultdict(list)
+    for s in subs:
+        if s.get("semesters"):
+            for sem in s["semesters"]:
+                by_sem["3-1" if sem["sem"] == "3-annual" else sem["sem"]].append((s, sem["credit"]))
+        else:
+            g = next((x for x in curriculum["groups"] if s["id"] in x["subject_ids"]), None)
+            sem_key = g["pick_per_sem"][0]["sem"] if g else "?"
+            by_sem["3-1" if sem_key == "3-annual" else sem_key].append((s, s.get("op_credit") or 0))
 
-            🚨 [주의: 특정 대학 편향 금지] 🚨
-            - 특정 대학교에 지원한다는 가정하에 작성하지 마세요. 
-            - 평가 기준 자료에 등장하는 특정 대학교 이름이나 '목표 대학'이라는 단어를 억지로 출력하지 마세요. 
-            - 오직 '상위권 대학들이 공통으로 요구하는 역량'을 잣대로 삼아, 이 학생부 자체가 가진 경쟁력과 전공 적합성에만 집중하세요.
+    rows_html = ""
+    grand_total = 0
+    for sem in ["1-1","1-2","2-1","2-2","3-1","3-2"]:
+        items = by_sem.get(sem, [])
+        sem_total = sum(c for _,c in items)
+        grand_total += sem_total
+        rows_html += f"<tr><td colspan='5' class='sem-hd'>{SEM_LABELS.get(sem, sem)} 배정 (정규교과 {sem_total}학점 + 자율체험 3학점 = 총 {sem_total+3}학점)</td></tr>"
+        for s, c in items:
+            rows_html += f"<tr><td>{s['area']}</td><td>{s.get('type','')}</td><td>{s['name']}</td><td>{c}학점</td><td>{'공통지정' if s['section']=='학교지정' else '학생진로선택'}</td></tr>"
 
-            🚨 [절대 엄수 - 팩트 체크 및 소설 작성 금지 규칙!] 🚨
-            1. 팩트 기반 작성 (할루시네이션 절대 금지): 
-               - 반드시 [업로드된 학생의 생기부 내용]에 '실제로 적혀있는 학년'과 '실제로 한 활동'만 가지고 분석하세요.
-               - 생기부에 없는 내용, 학년, 과목명, 활동명은 단 한 글자도 지어내면 안 됩니다.
-            2. 예시 내용 복사 금지: 
-               - 아래의 [작성 예시]는 구조와 문체를 보여주기 위함입니다. 빈칸에 반드시 학생의 '실제 데이터'만 채워 넣으세요.
-            3. 🆕 학년별 기록 부재를 약점으로 지적 절대 금지!: 
-               - 본 분석 시점은 학기 진행 중이며, 특히 3학년의 경우 아직 학생부 기록이 입력되지 않은 것이 정상임.
-               - "3학년 기록 부재" 등 학년별 기록의 부재를 약점으로 지적 절대 금지! 오직 '실제 입력된 활동 내용 자체의 질적 한계'에만 집중할 것.
-
-            🚨 [형식 및 문체 규칙] 🚨
-            1. 압축 서술: 사소한 활동은 버리고, 테마별로 가장 강력한 활동 단 2~3개만 엄선하여 3~4문장으로 압축할 것.
-            2. 이중 출처 표기:
-               - 문단 시작: 핵심 출처를 묶어서 `**[1학년 진로, 2학년 물리]** ` 형태로 표기.
-               - 문장 끝: 해당 활동의 개별 출처를 `[1학년 진로]` 형태로 꼬리표 달기.
-            3. 전 구간 개조식 어미 사용: 
-               - 모든 문장의 끝은 '~함', '~임', '~됨', '~판단됨', '~요망됨' 으로 끝낼 것. ('~다', '~합니다' 절대 금지)
-
-            [담당 교사의 특별 지시사항 및 희망 전공]
-            {teacher_context if teacher_context else "특별한 지시사항 없음."}
-            
-            [추천 도서 참고 자료 (HTML 본문 또는 텍스트)]
-            {actual_book_data}
-
-            [대학 평가 기준 자료 (범용 벤치마크용)]
-            {reference_text}
-
-            [업로드된 학생의 생기부 내용 (100% 팩트)]
-            {student_data_text}
-
-            위의 규칙을 완벽히 지켜서, 학생의 실제 데이터만을 바탕으로 아래 5가지 양식에 맞추어 답변해 주세요.
-            ### 1. 전공 적합성 및 주요 경쟁력
-            ### 2. 범용 평가 기준에 비추어 볼 때 보완이 필요한 약점
-            ### 3. 추천 심화 탐구 주제 및 면접 예상 질문 3가지
-            ### 4. 종합 의견 및 향후 발전 방향
-            ### 5. 맞춤형 추천 도서 및 연계 활동 제안 (반드시 [추천 도서 참고 자료]의 데이터를 우선적으로 분석 및 반영하여 희망 전공과 직결된 도서 3권을 추천하고, 각 도서를 읽은 후 세특에 녹여낼 수 있는 구체적인 '후속 탐구 활동'을 제안할 것)
-            """
-            
-            response = model.generate_content(prompt)
-            
-            status_box.success("✅ [분석 완료!] 초고속 심층 분석이 완료되었습니다. 결과물을 확인해 주세요!")
-            st.write(response.text)
-            
-            word_file = create_word_file(response.text)
-            st.download_button(
-                label="📥 분석 결과 워드(Word) 파일로 다운로드",
-                data=word_file,
-                file_name="생기부_분석결과_도서추천포함.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-            
-        except Exception as e:
-            status_box.error(f"오류가 발생했습니다: {e}")
-
-# ===== 푸터(만든이 정보) =====
-st.divider()
-st.markdown("""
-<div style='text-align: center; color: gray; padding: 20px; font-size: 13px;'>
-    🏫 학교생활기록부 분석 시스템 v4.1 (도서 DB 자동연동 기술 적용)<br>
-    만든이: <b>신선여자고등학교 김명남</b><br>
-    🗓️ 2026.04
+    return f"""<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset='utf-8'>
+<style>
+body {{ font-family: 'Malgun Gothic', sans-serif; padding: 25px; line-height: 1.5; }}
+.info-box {{ background:#f3f4f6; padding:15px; border-radius:6px; margin: 15px 0; border: 1px solid #d1d5db; }}
+table {{ width:100%; border-collapse: collapse; margin-top: 15px; }}
+th, td {{ border:1px solid #9ca3af; padding:10px; font-size: 13px; text-align: left; }}
+th {{ background:#f3f4f6; font-weight: bold; }}
+.sem-hd {{ background:#fef3c7; font-weight: bold; color: #b45309; }}
+.total {{ font-size: 16px; font-weight: bold; color:#4f46e5; margin-top:20px; }}
+</style></head><body>
+<h2>🎓 신선여자고등학교 고교학점제 학생 종합 이수계획 확인서</h2>
+<div class='info-box'>
+<b>대상 교육과정:</b> {year}학년도 입학생 설계 표준 &nbsp;&nbsp;|&nbsp;&nbsp; <b>학생 성명:</b> {name or '미입력'} &nbsp;&nbsp;|&nbsp;&nbsp; <b>학번 소속:</b> {sclass or '미입력'} &nbsp;&nbsp;|&nbsp;&nbsp; <b>상담 지도교사:</b> {counselor or '확인자 공란'}
 </div>
-""", unsafe_allow_html=True)
+<table><thead><tr><th>지정교과 영역군</th><th>과목 대분류</th><th>선택 확정 교과목명</th><th>배정 학점</th><th>이수 형태 구분</th></tr></thead>
+<tbody>{rows_html}</tbody></table>
+<div class='total'>※ 최종 집계 합산 결과: 교과 총합 {grand_total}학점 + 창의체험형 활동 18학점 = <b>최종 합계 {grand_total + 18}학점</b> (졸업 기준선 192학점 충족 여부 확인용)</div>
+</body></html>"""
+
+# ----------------- 15. 메인 마운트 라우팅 제어 -----------------
+if not st.session_state.get("year_selected", False):
+    page_landing()
+else:
+    if page == "🏠 홈": page_home()
+    elif page == "🗺️ 핵심 이수 경로": page_core_path()
+    elif page == "📚 학년별 교과목 탐색": page_explore()
+    elif page == "📅 시간표 시뮬레이터": page_simulator()
+    elif page == "🎓 2028 대입 권장 과목": page_career()
+    elif page == "🖨️ 결과 출력": page_print()
