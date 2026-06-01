@@ -65,54 +65,42 @@ def inject_styles():
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
     
-    /* ---------------------------------------------------------------------- */
-    /* 💡 [핵심 해결 로직] 특정 앵커(이름표) 밑에 있는 버튼만 콕 집어서 디자인 적용 */
-    
-    /* 🔴 2025학년도 버튼 (빨간색) */
-    .element-container:has(.anchor-2025) + .element-container .stButton button {{
-        background-color: #ff4b4b !important;
+    /* 💡 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
+    div.stButton button {{
         color: #ffffff !important;
+        background-color: #ff4b4b !important;
         font-size: 24px !important; 
         font-weight: 900 !important; 
         height: 80px !important; 
         border-radius: 12px !important; 
         border: none !important;
     }}
-    .element-container:has(.anchor-2025) + .element-container .stButton button p {{
-        color: #ffffff !important; font-size: 24px !important; font-weight: 900 !important;
+    
+    /* 학년도 변경 버튼에만 적용되는 강력한 검은색 고정 규칙 */
+    div.stButton:has(button p:contains("학년도 변경")) button,
+    div.stButton:has(button:contains("학년도 변경")) button {{
+        color: #000000 !important;
+        background-color: #e2e8f0 !important;
+        border: 1px solid #94a3b8 !important;
+        height: 45px !important;
+        font-size: 16px !important;
     }}
-    .element-container:has(.anchor-2025) + .element-container .stButton button:hover {{ background-color: #ff2b2b !important; }}
+    div.stButton:has(button p:contains("학년도 변경")) button p,
+    div.stButton:has(button:contains("학년도 변경")) button p {{
+        color: #000000 !important;
+        font-size: 16px !important;
+    }}
 
-    /* 🔵 2026학년도 버튼 (파란색) */
-    .element-container:has(.anchor-2026) + .element-container .stButton button {{
+    /* 2026학년도 버튼만 파란색으로 변경 */
+    div.stButton:has(button p:contains("2026학년도")) button,
+    div.stButton:has(button:contains("2026학년도")) button {{
         background-color: #1e40af !important;
         color: #ffffff !important;
-        font-size: 24px !important; 
-        font-weight: 900 !important; 
-        height: 80px !important; 
-        border-radius: 12px !important; 
-        border: none !important;
     }}
-    .element-container:has(.anchor-2026) + .element-container .stButton button p {{
-        color: #ffffff !important; font-size: 24px !important; font-weight: 900 !important;
+    div.stButton:has(button p:contains("2026학년도")) button p,
+    div.stButton:has(button:contains("2026학년도")) button p {{
+        color: #ffffff !important;
     }}
-    .element-container:has(.anchor-2026) + .element-container .stButton button:hover {{ background-color: #1d4ed8 !important; }}
-
-    /* 🔄 학년도 변경 버튼 (회색 배경, 검은 글씨) */
-    .element-container:has(.anchor-change-year) + .element-container .stButton button {{
-        background-color: #f3f4f6 !important;
-        color: #000000 !important;
-        border: 1px solid #cbd5e1 !important;
-        height: 45px !important;
-        border-radius: 8px !important;
-    }}
-    .element-container:has(.anchor-change-year) + .element-container .stButton button p {{
-        color: #000000 !important; font-size: 16px !important; font-weight: 800 !important;
-    }}
-    .element-container:has(.anchor-change-year) + .element-container .stButton button:hover {{
-        background-color: #e2e8f0 !important; border-color: #94a3b8 !important;
-    }}
-    /* ---------------------------------------------------------------------- */
     </style>
     """, unsafe_allow_html=True)
 
@@ -186,8 +174,17 @@ with st.sidebar:
         page = None
         year = st.session_state.get("entry_year", 2025)
 
+    # 💡 [사이드바 하단 링크 및 다운로드 영역 추가]
     st.markdown("---")
-    st.markdown("### 📥 자료 다운로드")
+    st.markdown("### 📥 자료실 및 관련 링크")
+    
+    # 1. 신선여자고등학교 가이드북 외부 링크
+    st.link_button("📖 신선여자고등학교 가이드북", "https://ebook.dsummer.co.kr/books/yxly/#p=1", use_container_width=True)
+    
+    # 2. 신선여자고등학교 계열별학과 안내 외부 링크
+    st.link_button("📖 신선여고 계열별 학과 안내", "https://ebook.dsummer.co.kr/books/exkt/#p=1", use_container_width=True)
+    
+    # 3. 선택과목 안내서 다운로드 (PDF)
     pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
     if pdf_path.exists():
         with open(pdf_path, "rb") as pdf_file:
@@ -218,19 +215,11 @@ def page_landing():
             st.markdown("<h1 class='landing-title-pink'>신선여자고등학교</h1><h2 class='landing-title-black'>고교학점제 이수 가이드</h2>", unsafe_allow_html=True)
     with c_r:
         st.markdown("<p style='color: #1f2937; font-size: 24px; font-weight: 900; margin-bottom: 20px;'>● 입학년도를 선택하세요.</p>", unsafe_allow_html=True)
-        
-        # 💡 [핵심 교정] 버튼 바로 위에 전용 이름표(Anchor)를 달아서 확실하게 디자인을 분리 적용합니다.
-        st.markdown("<div class='anchor-2025'></div>", unsafe_allow_html=True)
-        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True):
+        if st.button("2025학년도 입학생 선택 (현재 2학년)", use_container_width=True, type="primary"):
             st.session_state.entry_year = 2025; st.session_state.year_selected = True; st.rerun()
-            
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        
-        # 💡 [핵심 교정] 2026학년도 전용 이름표 (파란색 버튼용)
-        st.markdown("<div class='anchor-2026'></div>", unsafe_allow_html=True)
-        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True):
+        if st.button("2026학년도 입학생 선택 (현재 1학년)", use_container_width=True, type="secondary"):
             st.session_state.entry_year = 2026; st.session_state.year_selected = True; st.rerun()
-            
     st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
     render_made_by()
 
@@ -238,8 +227,6 @@ def page_landing():
 def page_home():
     col_l, col_r = st.columns([5, 1])
     with col_r:
-        # 💡 [핵심 교정] 학년도 변경 버튼 전용 이름표
-        st.markdown("<div class='anchor-change-year'></div>", unsafe_allow_html=True)
         if st.button("🔄 학년도 변경", use_container_width=True):
             st.session_state.year_selected = False; st.rerun()
 
