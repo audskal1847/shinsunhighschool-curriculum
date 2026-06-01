@@ -64,43 +64,6 @@ def inject_styles():
     /* 체크박스 및 선택박스 */
     .stCheckbox label, .stCheckbox label p {{ font-weight: 900 !important; font-size: 19px !important; color: #000000 !important; }}
     .stSelectbox label {{ font-weight: 900 !important; font-size: 17px !important; color: #000 !important; }}
-    
-    /* 💡 버튼 디자인 및 글자색을 흰색(#ffffff)으로 강제 고정 */
-    div.stButton button {{
-        color: #ffffff !important;
-        background-color: #ff4b4b !important;
-        font-size: 24px !important; 
-        font-weight: 900 !important; 
-        height: 80px !important; 
-        border-radius: 12px !important; 
-        border: none !important;
-    }}
-    
-    /* 학년도 변경 버튼에만 적용되는 강력한 검은색 고정 규칙 */
-    div.stButton:has(button p:contains("학년도 변경")) button,
-    div.stButton:has(button:contains("학년도 변경")) button {{
-        color: #000000 !important;
-        background-color: #e2e8f0 !important;
-        border: 1px solid #94a3b8 !important;
-        height: 45px !important;
-        font-size: 16px !important;
-    }}
-    div.stButton:has(button p:contains("학년도 변경")) button p,
-    div.stButton:has(button:contains("학년도 변경")) button p {{
-        color: #000000 !important;
-        font-size: 16px !important;
-    }}
-
-    /* 2026학년도 버튼만 파란색으로 변경 */
-    div.stButton:has(button p:contains("2026학년도")) button,
-    div.stButton:has(button:contains("2026학년도")) button {{
-        background-color: #1e40af !important;
-        color: #ffffff !important;
-    }}
-    div.stButton:has(button p:contains("2026학년도")) button p,
-    div.stButton:has(button:contains("2026학년도")) button p {{
-        color: #ffffff !important;
-    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -174,17 +137,11 @@ with st.sidebar:
         page = None
         year = st.session_state.get("entry_year", 2025)
 
-    # 💡 [사이드바 하단 링크 및 다운로드 영역 추가]
     st.markdown("---")
     st.markdown("### 📥 자료실 및 관련 링크")
-    
-    # 1. 신선여자고등학교 가이드북 외부 링크
     st.link_button("📖 신선여자고등학교 가이드북", "https://ebook.dsummer.co.kr/books/yxly/#p=1", use_container_width=True)
-    
-    # 2. 신선여자고등학교 계열별학과 안내 외부 링크
     st.link_button("📖 신선여고 계열별 학과 안내", "https://ebook.dsummer.co.kr/books/exkt/#p=1", use_container_width=True)
     
-    # 3. 선택과목 안내서 다운로드 (PDF)
     pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
     if pdf_path.exists():
         with open(pdf_path, "rb") as pdf_file:
@@ -205,6 +162,43 @@ SEM_LABELS = {"1-1":"1학년 1학기", "1-2":"1학년 2학기", "2-1":"2학년 1
 
 # ----------------- 8. 페이지: 랜딩 -----------------
 def page_landing():
+    # 💡 [핵심 해결 방법] 랜딩 페이지 안에서만 적용되는 확실한 규칙 적용. 
+    # 브라우저 버전 충돌을 막기 위해 가장 단순하고 강력한 속성자(kind)를 사용합니다.
+    st.markdown("""
+    <style>
+    /* 🔴 2025학년도 버튼 (Primary 속성 적용됨) */
+    .stButton > button[kind="primary"] {
+        background-color: #ff4b4b !important;
+        color: #ffffff !important; 
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        height: 80px !important;
+        border-radius: 12px !important;
+        border: none !important;
+    }
+    .stButton > button[kind="primary"]:hover { background-color: #ff2b2b !important; }
+    
+    /* 🔵 2026학년도 버튼 (Secondary 속성 적용됨) */
+    .stButton > button[kind="secondary"] {
+        background-color: #1e40af !important;
+        color: #ffffff !important; 
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        height: 80px !important;
+        border-radius: 12px !important;
+        border: none !important;
+    }
+    .stButton > button[kind="secondary"]:hover { background-color: #1d4ed8 !important; }
+    
+    /* 텍스트 완벽 흰색 고정 */
+    .stButton > button p {
+        color: #ffffff !important;
+        font-size: 24px !important;
+        font-weight: 900 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("<div style='height: 20vh;'></div>", unsafe_allow_html=True)
     c_l, c_r = st.columns([1, 1], gap="large")
     with c_l:
