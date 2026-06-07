@@ -139,7 +139,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### 📥 자료실 및 관련 링크")
-    st.link_button("📖 신선여자고등학교 가이드북(2026 입학생)", "https://ebook.dsummer.co.kr/books/yxly/#p=1", use_container_width=True)
+    st.link_button("📖 신선여자고등학교 가이드북(2026)", "https://ebook.dsummer.co.kr/books/yxly/#p=1", use_container_width=True)
     st.link_button("📖 신선여고 계열별 학과 안내", "https://ebook.dsummer.co.kr/books/exkt/#p=1", use_container_width=True)
     
     pdf_path = ASSETS_DIR / "2026.subjectguidebook.pdf"
